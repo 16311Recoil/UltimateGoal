@@ -15,6 +15,7 @@ public class Shooter {
     private final double TIME_FOR_INTAKE = 0;
     private final double flywheelPower = 0;
     private double angle = 0;
+    // Create a Servo Object
 
 
 
@@ -26,6 +27,8 @@ public class Shooter {
         intakeMotor = this.opMode.hardwareMap.dcMotor.get("intakeMotor");
         rotationMotor = this.opMode.hardwareMap.dcMotor.get("rotationMotor");
         outtakeServo = this.opMode.hardwareMap.servo.get("outtakeServo");
+
+        // Instantiate a servo object.
 
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
         rotationMotor.setDirection(DcMotor.Direction.FORWARD);
@@ -84,18 +87,37 @@ public class Shooter {
         setIntakePower(0);
     }
 
-
+    // OBJECTIVE: Given a target angle, increment the servo position, until that angle is met.
+    // How are you going to get feedback from a servo angle?
+    // Look into using a potentiometer (look into what sensors you can use).
+    //  How to get data from the sensors class?
+    //  Is there a loop? Recursive If?
     public void setAngle(double angle)
     {
     }
 
+    // No end point?
+    // if () {.setPower(0);}
+    // .getCurrentPosition()
     public void pivotShooter(double power)
     {
-        rotationMotor.setPower(power);
+            rotationMotor.setPower(power);
     }
 
-    public void shoot(double power)
-    {
+    // OBJECTIVE: What needs to happen for the robot to shoot a disc?
+    // 1.) The Disc Has to be present.
+    // 2.) Something needs to move to push it into position
+    // 3.) There needs to be some control of the power of the shooter?
+        // turnOnShooter()
+        // pushRing()
+    /*  turnAndShoot(){
+    //      turnOnShooter();
+    //      positionShooter();
+    //      pushRing();
+    //      turnOffShooter(); Or set Shooter Power to Zero
+
+     */
+    public void shoot(double power) {
     }
 
 

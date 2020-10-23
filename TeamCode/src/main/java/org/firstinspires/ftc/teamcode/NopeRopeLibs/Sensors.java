@@ -37,6 +37,10 @@ public class Sensors {
 
     private boolean autoBulkRead = false;
 
+    // WC replacement --- think about it
+    // Transition Sensor???
+    //
+
     // Webcam
     private final static String vuforiaKey = "";
     public static VuforiaLocalizer vuforia;
@@ -66,7 +70,7 @@ public class Sensors {
         parameters.vuforiaLicenseKey = vuforiaKey;
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
         Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
-        vuforia.setFrameQueueCapacity(4);
+        vuforia.setFrameQueueCapacity(4); // change?
     }
 
 
@@ -82,7 +86,7 @@ public class Sensors {
     }
 
     public Runnable manualBulkRead(boolean loop){
-        return () -> {
+            return () -> {
             for (LynxModule module : allHubs)
                 module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
             while(loop){
