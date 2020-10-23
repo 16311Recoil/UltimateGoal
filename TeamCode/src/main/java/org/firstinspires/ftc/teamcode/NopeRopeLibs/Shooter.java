@@ -3,13 +3,15 @@ package org.firstinspires.ftc.teamcode.NopeRopeLibs;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Shooter {
     private LinearOpMode opMode;
     private OpMode opMode_iterative;
-    private DcMotor il;
-    private DcMotor ir;
+    private DcMotor intakeMotor;
+    private DcMotor rotationMotor;
+    private Servo outtakeServo;
     private final double TIME_FOR_INTAKE = 0;
     private final double flywheelPower = 0;
     private double angle = 0;
@@ -21,17 +23,18 @@ public class Shooter {
         this.opMode = opMode;
         opMode.telemetry.addLine("Shooter Init Started");
         opMode.telemetry.update();
-        il = this.opMode.hardwareMap.dcMotor.get("il");
-        ir = this.opMode.hardwareMap.dcMotor.get("ir");
+        intakeMotor = this.opMode.hardwareMap.dcMotor.get("intakeMotor");
+        rotationMotor = this.opMode.hardwareMap.dcMotor.get("rotationMotor");
+        outtakeServo = this.opMode.hardwareMap.servo.get("outtakeServo");
 
-        il.setDirection(DcMotor.Direction.FORWARD);
-        ir.setDirection(DcMotor.Direction.FORWARD);
+        intakeMotor.setDirection(DcMotor.Direction.FORWARD);
+        rotationMotor.setDirection(DcMotor.Direction.FORWARD);
 
-        il.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        ir.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rotationMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        ir.setPower(0);
-        il.setPower(0);
+        intakeMotor.setPower(0);
+        rotationMotor.setPower(0);
 
 
         opMode.telemetry.addLine("Shooter Init Completed");
@@ -43,17 +46,19 @@ public class Shooter {
         this.opMode_iterative = opMode;
         opMode_iterative.telemetry.addLine("Shooter Init Started");
         opMode_iterative.telemetry.update();
-        il = this.opMode_iterative.hardwareMap.dcMotor.get("il");
-        ir = this.opMode_iterative.hardwareMap.dcMotor.get("ir");
+        intakeMotor = this.opMode_iterative.hardwareMap.dcMotor.get("intakeMotor");
+        rotationMotor = this.opMode_iterative.hardwareMap.dcMotor.get("rotationMotor");
+        outtakeServo = this.opMode_iterative.hardwareMap.servo.get("rotationMotor");
 
-        il.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        ir.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        ir.setPower(0);
-        il.setPower(0);
+        intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        rotationMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        il.setDirection(DcMotor.Direction.FORWARD);
-        ir.setDirection(DcMotor.Direction.FORWARD);
+        rotationMotor.setPower(0);
+        intakeMotor.setPower(0);
+
+        intakeMotor.setDirection(DcMotor.Direction.FORWARD);
+        rotationMotor.setDirection(DcMotor.Direction.FORWARD);
 
 
         opMode_iterative.telemetry.addLine("Shooter Init Completed");
@@ -61,28 +66,13 @@ public class Shooter {
 
     }
 
-    public DcMotor getIl() {
-        return il;
-    }
-
-    public void setIl(DcMotor il) {
-        this.il = il;
-    }
-
-    public DcMotor getIr() {
-        return ir;
-    }
-
-    public void setIr(DcMotor ir) {
-        this.ir = ir;
-    }
 
 
 
     public void setIntakePower(double power)
     {
-        il.setPower(power);
-        ir.setPower(power);
+        intakeMotor.setPower(power);
+        rotationMotor.setPower(power);
 
     }
 
@@ -98,6 +88,17 @@ public class Shooter {
     public void setAngle(double angle)
     {
     }
+
+    public void pivotShooter(double power)
+    {
+        rotationMotor.setPower(power);
+    }
+
+    public void shoot(double power)
+    {
+    }
+
+
 
 
 
