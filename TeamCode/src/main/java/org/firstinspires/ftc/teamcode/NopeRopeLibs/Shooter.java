@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.NopeRopeLibs;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -19,14 +20,14 @@ public class Shooter {
 
 
 
-    public Shooter(LinearOpMode opMode)
-    {
+    public Shooter(LinearOpMode opMode) {
         this.opMode = opMode;
         opMode.telemetry.addLine("Shooter Init Started");
         opMode.telemetry.update();
         intakeMotor = this.opMode.hardwareMap.dcMotor.get("intakeMotor");
         rotationMotor = this.opMode.hardwareMap.dcMotor.get("rotationMotor");
         outtakeServo = this.opMode.hardwareMap.servo.get("outtakeServo");
+        //outtakeServo = hardwareMap.get(Servo.class, "left_hand");
 
         // Instantiate a servo object.
 
@@ -44,8 +45,8 @@ public class Shooter {
         opMode.telemetry.update();
 
     }
-    public Shooter(OpMode opMode)
-    {
+
+    public Shooter(OpMode opMode) {
         this.opMode_iterative = opMode;
         opMode_iterative.telemetry.addLine("Shooter Init Started");
         opMode_iterative.telemetry.update();
@@ -70,10 +71,7 @@ public class Shooter {
     }
 
 
-
-
-    public void setIntakePower(double power)
-    {
+    public void setIntakePower(double power) {
         intakeMotor.setPower(power);
         rotationMotor.setPower(power);
 
@@ -90,26 +88,47 @@ public class Shooter {
     // OBJECTIVE: Given a target angle, increment the servo position, until that angle is met.
     // How are you going to get feedback from a servo angle?
     // Look into using a potentiometer (look into what sensors you can use).
-    //  How to get data from the sensors class?
     //  Is there a loop? Recursive If?
-    public void setAngle(double angle)
-    {
+    public void setAngle(double power) {
+
+        double currentAngle = sensor(); //?
+        double targetAngle = sensor(); //?
+
+        while (currentAngle < targetAngle){
+            double error = targetAngle - currentAngle;
+            outtakeServo.setDirection(error);
+            currentAngle = sensor();
+        }
+    }
+
+    //  How to get data from the sensors class?
+    public double sensor() {
+        Sensors angles = new Sensors();
+        return //what methods from the sensors class?
+
     }
 
     // No end point?
     // if () {.setPower(0);}
     // .getCurrentPosition()
-    public void pivotShooter(double power)
-    {
+    public void pivotShooter(double power) {
+
+        double target = sensor();
+        double CurrentMotorPosition = rotationMotor.getCurrentPosition();
+        while (CurrentMotorPosition < target) {
             rotationMotor.setPower(power);
+            CurrentMotorPosition = rotationMotor.getCurrentPosition();
+        }
+        rotationMotor.setPower(0);
+
     }
 
     // OBJECTIVE: What needs to happen for the robot to shoot a disc?
     // 1.) The Disc Has to be present.
     // 2.) Something needs to move to push it into position
     // 3.) There needs to be some control of the power of the shooter?
-        // turnOnShooter()
-        // pushRing()
+    // turnOnShooter()
+    // pushRing()
     /*  turnAndShoot(){
     //      turnOnShooter();
     //      positionShooter();
@@ -117,15 +136,31 @@ public class Shooter {
     //      turnOffShooter(); Or set Shooter Power to Zero
 
      */
-    public void shoot(double power) {
+
+
+    public boolean discPresent() {
+        return//sensorthatsensesifdiscsthere
+
     }
 
 
+    public void turnOnShooter() {
+        outtakeServo.setPosition();
+    }
 
 
+    public void pushRing(double power) {}
 
+    public void turnOffShooter() {
+        outtakeServo.setPosition(0);
+    }
 
+    public void turnAndShoot() {
+        turnOnShooter();
+        pivotShooter();
+        pushRing();
+        turnOffShooter();
 
-
+    }
 
 }
