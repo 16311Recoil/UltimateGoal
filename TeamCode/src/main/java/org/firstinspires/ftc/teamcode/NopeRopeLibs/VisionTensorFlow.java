@@ -51,8 +51,8 @@ import java.util.List;
  * IMPORTANT: In order to use this OpMode, you need to obtain your own Vuforia license key as
  * is explained below.
  */
+
 @TeleOp(name = "Concept: TensorFlow Object Detection", group = "Concept")
-@Disabled
 public class VisionTensorFlow extends LinearOpMode {
     private static final String TFOD_MODEL_ASSET = "UltimateGoal.tflite";
     private static final String LABEL_FIRST_ELEMENT = "Quad";
@@ -71,8 +71,7 @@ public class VisionTensorFlow extends LinearOpMode {
      * and paste it in to your code on the next line, between the double quotes.
      */
     private static final String VUFORIA_KEY =
-            "AU5V2Zr/////AAABmTyLGvLADkQMj7KO5SybwIBFMDGOh6UbhHbOcPIzf2AUeG8hSvpZ5sin2YHPK6iJHHKAs4lTpdmIdZs4VIjEDLjrz3QPFJxSitRYPZlcWZT8MfAyjfz70VVCEUk+mDCiKjZu4JcwI8EO2kcpNnnNfJAkCleZG4/Oa78vCvp11A5D+NT0dQ0fUn23VqzCRnV4lyjGT4wJWZDkmNUac4eW/oDDaEwH02UGQr98rxR1ASe3GAYDubIHMQWwbwleRGj7GhvGCCDwrOznwTLPc/0AjpDckArTEAZtRQUDDp4oTOXiQjXkDJuqXxigfnAu6hghc2/rxkAhr+oATZRZ633m77d1oRGeDuNGy8yFEvhvLY4B";
-
+                                    "Af3vSoL/////AAABma0giwi1wUAFvbR+3viMgUU3mVbJZo0YlBBtRfFN4OgRPdOeiHPiHt2VYem2a4puKHp/bSO63C1Vj2mGKs5i1QHs8bxyaHSZKemmux1vjUqFaBdvXWYw9nX9c78wKr7Ss0uaGxAeHyf5P0m5RD5tHk8Xuvj34YvNxdK5bKph87rb7bX5l+xCY4NISePeG3zhnd/VADytYLTIgdFZca89f4ALYSZodM77dB0qjRx4MGZsO7RKvVWApYWDDNM/x4Y/BmC4jK5tgEY1L9TZrJ+0GSzWr1qh74F4eTya8JBjTZQetauCHnnpZdDy5av131y+ek6xcBM8XMatwx8xz7ptXEZ6GSR6olCx62IkpymgJF+C";
     /**
      * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
      * localization engine.

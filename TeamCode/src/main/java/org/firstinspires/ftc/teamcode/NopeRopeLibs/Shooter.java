@@ -4,6 +4,7 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -11,214 +12,209 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class Shooter {
     private LinearOpMode opMode;
     private OpMode opMode_iterative;
-    private DcMotor shooterMotor; //the actual shooter
-    private DcMotor rotationMotor; //larger black wheel
-    private DcMotor screwMotor;
-    private DcMotor intakeMotor;
-    Servo ringPusher;
-    Servo shooterAngle;
+    private DcMotor shooterMotor; //Outtake Wheels
+    private DcMotor rotationMotor; //Larger Rotation Device
+    private DcMotor screwMotor; //Motor to power the screws
+    private DcMotor intakeMotor; //Intake
+    Servo ringPusher; //Pushes the ring into the outtake
+    Servo angleChanger; //Adjusts the angle of the ramp/shooter
+    Sensors sensors;
 
-    private final double TIME_FOR_INTAKE = 0;
-    private final double flywheelPower = 0;
-    private double angle = 0;
-    // Create a Servo Object
-
+    private final double SERVO_POSITION_TO_ANGLE_FACTOR = 0; //Test for later
+    boolean push = true;
 
 
     public Shooter(LinearOpMode opMode) {
         this.opMode = opMode;
         opMode.telemetry.addLine("Shooter Init Started");
         opMode.telemetry.update();
+
         //Motors
         shooterMotor = this.opMode.hardwareMap.dcMotor.get("shooterMotor");
         rotationMotor = this.opMode.hardwareMap.dcMotor.get("rotationMotor");
         screwMotor = this.opMode.hardwareMap.dcMotor.get("screwMotor");
         intakeMotor = this.opMode.hardwareMap.dcMotor.get("intakeMotor");
+
         //Servos
         ringPusher = this.opMode.hardwareMap.servo.get("ringPusher");
-        shooterAngle = this.opMode.hardwareMap.servo.get("shooterAngle");
+        angleChanger = this.opMode.hardwareMap.servo.get("angleChanger");
 
-        // Instantiate a servo object.
 
-        intakeMotor.setDirection(DcMotor.Direction.FORWARD);
+
         rotationMotor.setDirection(DcMotor.Direction.FORWARD);
+        shooterMotor.setDirection(DcMotor.Direction.FORWARD);
+        screwMotor.setDirection(DcMotor.Direction.FORWARD);
+        intakeMotor.setDirection(DcMotor.Direction.FORWARD);
 
-        intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        ringPusher.setDirection(Servo.Direction.FORWARD);
+        angleChanger.setDirection(Servo.Direction.FORWARD);
+
         rotationMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        shooterMotor.setPower(0);
-        rotationMotor.setPower(0);
-        screwMotor.setPower(0);
-        intakeMotor.setPower(0);
+        shooterMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        screwMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
 
         opMode.telemetry.addLine("Shooter Init Completed");
         opMode.telemetry.update();
 
+        sensors = new Sensors(this.opMode);
     }
 
     public Shooter(OpMode opMode) {
         this.opMode_iterative = opMode;
         opMode_iterative.telemetry.addLine("Shooter Init Started");
         opMode_iterative.telemetry.update();
-        shooterMotor = this.opMode_iterative.hardwareMap.dcMotor.get("shooterMotor");
-        rotationMotor = this.opMode_iterative.hardwareMap.dcMotor.get("rotationMotor");
-        screwMotor = this.opMode_iterative.hardwareMap.dcMotor.get("screwMotor");
-        intakeMotor = this.opMode_iterative.hardwareMap.dcMotor.get("intakeMotor");
 
-        ringPusher = this.opMode_iterative.hardwareMap.servo.get("ringPusher");
-        shooterAngle = this.opMode_iterative.hardwareMap.servo.get("shooterAngle");
+        //Motors
+        shooterMotor = this.opMode.hardwareMap.dcMotor.get("shooterMotor");
+        rotationMotor = this.opMode.hardwareMap.dcMotor.get("rotationMotor");
+        screwMotor = this.opMode.hardwareMap.dcMotor.get("screwMotor");
+        intakeMotor = this.opMode.hardwareMap.dcMotor.get("intakeMotor");
+
+        //Servos
+        ringPusher = this.opMode.hardwareMap.servo.get("ringPusher");
+        angleChanger = this.opMode.hardwareMap.servo.get("angleChanger");
 
 
-        intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        rotationMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        shooterMotor.setPower(0);
-        rotationMotor.setPower(0);
-        screwMotor.setPower(0);
-        intakeMotor.setPower(0);
-
-        intakeMotor.setDirection(DcMotor.Direction.FORWARD);
         rotationMotor.setDirection(DcMotor.Direction.FORWARD);
+        shooterMotor.setDirection(DcMotor.Direction.FORWARD);
+        screwMotor.setDirection(DcMotor.Direction.FORWARD);
+        intakeMotor.setDirection(DcMotor.Direction.FORWARD);
+
+        ringPusher.setDirection(Servo.Direction.FORWARD);
+        angleChanger.setDirection(Servo.Direction.FORWARD);
+
+        rotationMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        shooterMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        screwMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
 
-        opMode_iterative.telemetry.addLine("Shooter Init Completed");
-        opMode_iterative.telemetry.update();
+        opMode.telemetry.addLine("Shooter Init Completed");
+        opMode.telemetry.update();
 
+        sensors = new Sensors(this.opMode);
     }
 
     public void setIntakePower(double power) {
         intakeMotor.setPower(power);
-        rotationMotor.setPower(power);
-
     }
 
-    public void intakeTime(double power) {
+    public void setRotationPower(double power){
+        rotationMotor.setPower(power);
+    }
+
+    public void setShooterPower (double power){
+        shooterMotor.setPower(power);
+    }
+
+    public void setScrewPower (double power){
+        screwMotor.setPower(power);
+    }
+
+    public void intakeTime(double power, double time) {
         ElapsedTime timer = new ElapsedTime();
-        while (timer.seconds() < TIME_FOR_INTAKE) {
+        while (timer.seconds() < time) {
             setIntakePower(power);
         }
         setIntakePower(0);
     }
 
-    // OBJECTIVE: Given a target angle, increment the servo position, until that angle is met.
-    // How are you going to get feedback from a servo angle?
-    // Look into using a potentiometer (look into what sensors you can use).
-    //  Is there a loop? Recursive If?
-
-
-    //  How to get data from the sensors class?
-    public double sensor() {
-        Sensors angles = new Sensors();
-        return //what methods from the sensors class?
-
-    }
-
-    // No end point?
-    // if () {.setPower(0);}
-    // .getCurrentPosition()
-    public void pivotShooter(double power) { //?
-
-        double target = sensor();
-        double CurrentMotorPosition = rotationMotor.getCurrentPosition();
-        while (CurrentMotorPosition < target) {
-            rotationMotor.setPower(power);
-            CurrentMotorPosition = rotationMotor.getCurrentPosition();
+    public void shooterTime(double power, double time){
+        ElapsedTime timer = new ElapsedTime();
+        while (timer.seconds() < time){
+            setShooterPower(power);
         }
-        rotationMotor.setPower(0);
-
+        setShooterPower(0);
     }
 
-    // OBJECTIVE: What needs to happen for the robot to shoot a disc?
-    // 1.) The Disc Has to be present.
-    // 2.) Something needs to move to push it into position.
-    // 3.) There needs to be some control of the power of the shooter?
-    // turnOnShooter()
-    // pushRing()
-    /*  turnAndShoot(){
-    //      turnOnShooter();
-    //      positionShooter();
-    //      pushRing();
-    //      turnOffShooter(); Or set Shooter Power to Zero
-
-     */
-
-
-    public void turnOnShooter(double power) { //does the power vary?
-        shooterMotor.setPower(power);
-    }
-
-
-    public void turnOffShooter() {
-        shooterMotor.setPower(0);
-    }
-
-    public void turnAndShoot() {
-        turnOnShooter();
-        pivotShooter();
-        pushRingUp();
-        turnOffShooter();
-
-    }
-
-    public void intakeRing(double power){
-        while (!discPresent()) {
-            intakeMotor.setPower(power);
+    public void rotationTime(double power, double time) {
+        ElapsedTime timer = new ElapsedTime();
+        while (timer.seconds() < time) {
+            setRotationPower(power);
         }
-        intakeMotor.setPower(0);
+        setRotationPower(0);
+    }
 
+    public void screwTime(double power, double time) {
+        ElapsedTime timer = new ElapsedTime();
+        while (timer.seconds() < time) {
+            setScrewPower(power);
+        }
+        setScrewPower(0);
+    }
+
+    /*public void rotationEncoder(double power, double angle) {
+        ElapsedTime timer = new ElapsedTime();
+        while (timer.seconds() < time) {
+            setRotationPower(power);
+        }
+        setRotationPower(0);
+    }*/
+
+    public void pivotRotation (double power, double desiredAngle){
+        desiredAngle = Math.toRadians(desiredAngle);
+        double currentAngle = sensors.getRotationAngle(); //radians
+        if (Math.abs(desiredAngle - currentAngle) > Math.PI) {
+            desiredAngle += Math.PI * 2;
+        }
+        boolean turnRight = ((currentAngle-desiredAngle) < (desiredAngle-currentAngle));
+        if (turnRight){
+            setRotationPower(power);
+            while (currentAngle > desiredAngle){ }
+        }
+        else {
+            setRotationPower(-power);
+            while (desiredAngle > currentAngle){ }
+        }
+        setRotationPower(0);
+    }
+
+    public void setShooterAngle(double angle){
+        angleChanger.setPosition(angle * SERVO_POSITION_TO_ANGLE_FACTOR);
+    }
+
+    public void togglePusher(){
+        if (push){
+
+        }
     }
 
     public void pushRingUp(double power) {
-        while discPosition(){
+        while (!sensors.getShooterValid()){
             screwMotor.setPower(power);
         }
         screwMotor.setPower(0);
-
     }
 
-    public boolean discPresent() {
-        //sensorthatsensesifdiscsthere
-        return // true if there are already three rings
-
-    }
-
-    public boolean discPosition(){ //distance sensor
-        return //true if disc is at the top
-    }
-
-    public void rotateWheel(double power){ //under what conditions? probably use a distance sensor?
-
-        double currentAngle = sensor();
-        double targetAngle = sensor();
-
-        while (currentAngle < targetAngle){
-            double error = targetAngle - currentAngle;
-            rotationMotor.setPower(power);
-            currentAngle = sensor();
+    public void intakeRing(double power){
+        while (sensors.getTransitionValid()) {
+            intakeMotor.setPower(power);
         }
-
-
+        intakeMotor.setPower(0);
     }
 
-    public void angleShooter(){
+    public boolean discsFull() {
+        return sensors.getTransitionValid();
+    }
 
-        double currentAngle = sensor();
-        double targetAngle = sensor();
+    public boolean discAtTop() { //distance sensor
+        return sensors.getShooterValid();
+    }
 
-        while (currentAngle < targetAngle){
-            double error = targetAngle - currentAngle;
-            shooterAngle.setDirection(error);
-            currentAngle = sensor();
-        }
-
+    public void turnAndShoot(double powerShooter, double powerRotation, double powerScrews, double angle) {
+        setShooterPower(powerShooter);
+        pivotRotation(powerRotation, angle);
+        pushRingUp(powerScrews);
+        setShooterPower(0);
     }
 
     public void shootRing(double power){ //does the power vary?
         ringPusher.setPosition();
         ringPusher.setPosition();
         shooterMotor.setPower(power);
-
     }
 
 }

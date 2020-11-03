@@ -115,15 +115,19 @@ public class Drivetrain {
     }
 
     public void turnTo (double power, double desiredAngle, double timeout){
+        ElapsedTime timer = new ElapsedTime();
         double currentAngle = getAngle(); //radians
-        boolean turnRight = ((currentAngle-desiredAngle) < Math.PI); //don't use 2pi only 0
+        if (Math.abs(desiredAngle - currentAngle) > Math.PI) {
+            desiredAngle += 360;
+        }
+        boolean turnRight = ((currentAngle-desiredAngle) < (desiredAngle-currentAngle));
         if (turnRight){
             turn(power, true);
-            while (currentAngle > desiredAngle){ }
+            while ((currentAngle > desiredAngle) && (timer.seconds() < timeout)){ }
         }
         else {
             turn(power, false);
-            while (desiredAngle > currentAngle){ }
+            while ((desiredAngle > currentAngle) && (timer.seconds() < timeout)){ }
         }
         setAllMotors(0);
     }
