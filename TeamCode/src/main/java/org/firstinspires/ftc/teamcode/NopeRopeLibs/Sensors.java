@@ -1,15 +1,21 @@
 package org.firstinspires.ftc.teamcode.NopeRopeLibs;
 
 
+import android.graphics.Path;
+
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.vuforia.PIXEL_FORMAT;
 import com.vuforia.Vuforia;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.teamcode.util.Encoder;
 
@@ -22,9 +28,16 @@ public class Sensors {
     private Encoder front, left, right;
     private List<LynxModule> allHubs;
 
+    private static int count = 0;
+
     // Used for logging cycle reads.
     private ElapsedTime readTimer;
 
+    private Rev2mDistanceSensor transition;
+    private Rev2mDistanceSensor shooter;
+
+    private DistanceSensor transitionValidation;
+    private DistanceSensor shooterValidation;
 
     public Encoder[] drivetrainEncoders;
 
@@ -37,17 +50,21 @@ public class Sensors {
 
     private boolean autoBulkRead = false;
 
-    // WC replacement --- think about it
-    // Transition Sensor???
-    //
-
-    // Webcam
-    private final static String vuforiaKey = "";
+    private static final String vuforiaKey = "";
     public static VuforiaLocalizer vuforia;
+    private static final double SHOOTER_DIAMETER = 1.0;
+    private static final double TRANSITION_LENGTH = 1.0;
 
-    public Sensors(OpMode opMode){
+    public Sensors(OpMode opMode, boolean LinearOpMode){
+
         // Gets all REV Hubs
         allHubs = opMode.hardwareMap.getAll(LynxModule.class);
+
+        transitionValidation = opMode.hardwareMap.get(DistanceSensor.class, "transitionDS");
+        shooterValidation = opMode.hardwareMap.get(DistanceSensor.class, "shooterDS");
+
+        transition = (Rev2mDistanceSensor) transitionValidation;
+        shooter = (Rev2mDistanceSensor) shooterValidation;
 
         // Hardware Maps All of the Encoders
         front = new Encoder(opMode.hardwareMap.get(DcMotorEx.class, "front"));
@@ -110,6 +127,22 @@ public class Sensors {
         autoBulkRead = false;
         for (LynxModule module : allHubs)
             module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+    }
+
+    public boolean getShooterValid(){
+        if (shooter.getDistance(DistanceUnit.INCH) <= SHOOTER_DIAMETER)
+            return true;
+        return false;
+    }
+
+    // color sensor
+    public boolean getTransitionValid(){
+        if (transition.getDistance(DistanceUnit.INCH) <= TRANSITION_LENGTH && count < 3) {
+            count++;
+            return true;
+        }
+        else
+            return false;
     }
 
     public Encoder[] getDrivetrainEncoders() {
