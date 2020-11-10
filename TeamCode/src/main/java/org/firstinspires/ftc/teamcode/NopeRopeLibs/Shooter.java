@@ -54,11 +54,13 @@ public class Shooter {
         screwMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
+        rotationMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
 
         opMode.telemetry.addLine("Shooter Init Completed");
         opMode.telemetry.update();
 
-        sensors = new Sensors(this.opMode);
+        sensors = new Sensors(this.opMode, true);
     }
 
     public Shooter(OpMode opMode) {
@@ -95,7 +97,7 @@ public class Shooter {
         opMode.telemetry.addLine("Shooter Init Completed");
         opMode.telemetry.update();
 
-        sensors = new Sensors(this.opMode);
+        sensors = new Sensors(this.opMode, false);
     }
 
     public void setIntakePower(double power) {
@@ -154,6 +156,21 @@ public class Shooter {
         setRotationPower(0);
     }*/
 
+    /*
+     public static boolean pivotRotation (double currentAngle, double desiredAngle){
+        desiredAngle = Math.toRadians(desiredAngle);
+        currentAngle = Math.toRadians(currentAngle);
+
+        if (Math.abs(desiredAngle - currentAngle) > Math.PI) {
+           if (Math.min(desiredAngle, currentAngle) == desiredAngle){
+               desiredAngle += (2 * Math.PI);
+           } else{
+               currentAngle += (2 * Math.PI);
+           }
+        }
+       return ((currentAngle-desiredAngle) > (desiredAngle-currentAngle));
+    }
+     */
     public void pivotRotation (double power, double desiredAngle){
         desiredAngle = Math.toRadians(desiredAngle);
         double currentAngle = sensors.getRotationAngle(); //radians

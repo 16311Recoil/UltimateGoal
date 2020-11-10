@@ -25,8 +25,10 @@ import java.util.List;
 public class Sensors {
 
     // Encoders used for odometry
-    private Encoder front, left, right;
+    private Encoder front, left, right, rotation;
     private List<LynxModule> allHubs;
+    private OpMode opmode;
+
 
     private static int count = 0;
 
@@ -39,14 +41,28 @@ public class Sensors {
     private DistanceSensor transitionValidation;
     private DistanceSensor shooterValidation;
 
-    public Encoder[] drivetrainEncoders;
+    public Encoder[] encoders;
 
     public double[] positionVals;
     public double[] velocityVals;
 
-    private final int FRONT = 0;
-    private final int LEFT = 1;
-    private  final int RIGHT = 2;
+    private enum EncoderIndexes{
+        FRONT(0),
+        LEFT(1),
+        RIGHT(2),
+        ROTATION(3);
+
+        private int index;
+
+        EncoderIndexes(int index){
+            this.index = index;
+        }
+
+        public int getIndex() {
+            return index;
+        }
+    }
+
 
     private boolean autoBulkRead = false;
 
@@ -57,6 +73,7 @@ public class Sensors {
 
     public Sensors(OpMode opMode, boolean LinearOpMode){
 
+        this.opmode = opMode;
         // Gets all REV Hubs
         allHubs = opMode.hardwareMap.getAll(LynxModule.class);
 
@@ -70,8 +87,12 @@ public class Sensors {
         front = new Encoder(opMode.hardwareMap.get(DcMotorEx.class, "front"));
         left = new Encoder(opMode.hardwareMap.get(DcMotorEx.class, "left"));
         right = new Encoder(opMode.hardwareMap.get(DcMotorEx.class, "right"));
+        rotation = new Encoder(opMode.hardwareMap.get(DcMotorEx.class, "rotation"));
 
-        drivetrainEncoders = new Encoder[]{front, left, right};
+
+        encoders = new Encoder[]{front, left, right, rotation};
+        positionVals = new double[4];
+        velocityVals = new double[4];
 
         //Set br to auto for now.
         for (LynxModule module : allHubs) {
@@ -94,9 +115,7 @@ public class Sensors {
     // Bulk reads within the control loop
     public void autoBulkRead() throws AutoBulkReadNotSetException {
         if (autoBulkRead) {
-            front.getCurrentPosition();
-            left.getCurrentPosition();
-            right.getCurrentPosition();
+           updateValues(encoders, positionVals, velocityVals);
         } else {
             throw new AutoBulkReadNotSetException("::Auto Not Enabled");
         }
@@ -107,17 +126,13 @@ public class Sensors {
             for (LynxModule module : allHubs)
                 module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
             while(loop){
-                front.getCurrentPosition();
-                left.getCurrentPosition();
-                right.getCurrentPosition();
-
-                updateEncoders();
+                updateValues(encoders, positionVals, velocityVals);
             }
 
         };
 
     }
-    public void updateEncoders(){}
+
     public void turnOnAutoBulkReads(){
         autoBulkRead = true;
         for (LynxModule module : allHubs)
@@ -145,12 +160,28 @@ public class Sensors {
             return false;
     }
 
-    public Encoder[] getDrivetrainEncoders() {
-        return drivetrainEncoders;
+    //returns shooter angle
+    public double getRotationAngle(){
+        double currentVal = rotation.getCurrentPosition();
+
+
     }
 
-    public void setDrivetrainEncoders(Encoder[] drivetrainEncoders) {
-        this.drivetrainEncoders = drivetrainEncoders;
+
+    public Encoder[] getEncoders() {
+        return encoders;
+    }
+
+    public void setEncoders(Encoder[] drivetrainEncoders) {
+        this.encoders = drivetrainEncoders;
+    }
+
+    private void updateValues(Encoder[] encoders, double[] positionVals, double[] velocityVals){
+        for(int i = 0; i < encoders.length; i++){
+            positionVals[i] = encoders[i].getCurrentPosition();
+            velocityVals[i] = encoders[i].getCorrectedVelocity();
+        }
+
     }
 
     public double[] getPositionVals() {
