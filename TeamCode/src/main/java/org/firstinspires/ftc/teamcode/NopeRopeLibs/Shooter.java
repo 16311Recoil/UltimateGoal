@@ -15,7 +15,7 @@ public class Shooter {
     private DcMotor shooterMotor; //Outtake Wheels
     private DcMotor rotationMotor; //Larger Rotation Device
     private DcMotor screwMotor; //Motor to power the screws
-    private DcMotor intakeMotor; //Intake
+
     Servo ringPusher; //Pushes the ring into the outtake
     Servo angleChanger; //Adjusts the angle of the ramp/shooter
     Sensors sensors;
@@ -33,7 +33,7 @@ public class Shooter {
         shooterMotor = this.opMode.hardwareMap.dcMotor.get("shooterMotor");
         rotationMotor = this.opMode.hardwareMap.dcMotor.get("rotationMotor");
         screwMotor = this.opMode.hardwareMap.dcMotor.get("screwMotor");
-        intakeMotor = this.opMode.hardwareMap.dcMotor.get("intakeMotor");
+
 
         //Servos
         ringPusher = this.opMode.hardwareMap.servo.get("ringPusher");
@@ -44,7 +44,7 @@ public class Shooter {
         rotationMotor.setDirection(DcMotor.Direction.FORWARD);
         shooterMotor.setDirection(DcMotor.Direction.FORWARD);
         screwMotor.setDirection(DcMotor.Direction.FORWARD);
-        intakeMotor.setDirection(DcMotor.Direction.FORWARD);
+
 
         ringPusher.setDirection(Servo.Direction.FORWARD);
         angleChanger.setDirection(Servo.Direction.FORWARD);
@@ -52,7 +52,7 @@ public class Shooter {
         rotationMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooterMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         screwMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
 
         rotationMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
@@ -72,7 +72,7 @@ public class Shooter {
         shooterMotor = this.opMode.hardwareMap.dcMotor.get("shooterMotor");
         rotationMotor = this.opMode.hardwareMap.dcMotor.get("rotationMotor");
         screwMotor = this.opMode.hardwareMap.dcMotor.get("screwMotor");
-        intakeMotor = this.opMode.hardwareMap.dcMotor.get("intakeMotor");
+
 
         //Servos
         ringPusher = this.opMode.hardwareMap.servo.get("ringPusher");
@@ -83,7 +83,6 @@ public class Shooter {
         rotationMotor.setDirection(DcMotor.Direction.FORWARD);
         shooterMotor.setDirection(DcMotor.Direction.FORWARD);
         screwMotor.setDirection(DcMotor.Direction.FORWARD);
-        intakeMotor.setDirection(DcMotor.Direction.FORWARD);
 
         ringPusher.setDirection(Servo.Direction.FORWARD);
         angleChanger.setDirection(Servo.Direction.FORWARD);
@@ -91,7 +90,6 @@ public class Shooter {
         rotationMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooterMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         screwMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
 
         opMode.telemetry.addLine("Shooter Init Completed");
@@ -100,9 +98,6 @@ public class Shooter {
         sensors = new Sensors(this.opMode, false);
     }
 
-    public void setIntakePower(double power) {
-        intakeMotor.setPower(power);
-    }
 
     public void setRotationPower(double power){
         rotationMotor.setPower(power);
@@ -114,14 +109,6 @@ public class Shooter {
 
     public void setScrewPower (double power){
         screwMotor.setPower(power);
-    }
-
-    public void intakeTime(double power, double time) {
-        ElapsedTime timer = new ElapsedTime();
-        while (timer.seconds() < time) {
-            setIntakePower(power);
-        }
-        setIntakePower(0);
     }
 
     public void shooterTime(double power, double time){
@@ -206,13 +193,6 @@ public class Shooter {
         screwMotor.setPower(0);
     }
 
-    public void intakeRing(double power){
-        while (sensors.getTransitionValid()) {
-            intakeMotor.setPower(power);
-        }
-        intakeMotor.setPower(0);
-    }
-
     public boolean discsFull() {
         return sensors.getTransitionValid();
     }
@@ -229,8 +209,8 @@ public class Shooter {
     }
 
     public void shootRing(double power){ //does the power vary?
-        ringPusher.setPosition();
-        ringPusher.setPosition();
+        ringPusher.setPosition(0);
+        ringPusher.setPosition(0);
         shooterMotor.setPower(power);
     }
 

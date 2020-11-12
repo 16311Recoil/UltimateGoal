@@ -6,47 +6,50 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-public class IntakeTestClass {
-    private LinearOpMode opMode;
-    private OpMode opMode_iterative;
+public class Intake {
+    private LinearOpMode auto; // auto -> sequential steps -> end on its own
+    private OpMode teleop; // looping -> constantly running -> tell it to end
+
     private DcMotor intakeMotor;
     Sensors sensors;
 
-    public IntakeTestClass (LinearOpMode opMode) {
-        this.opMode = opMode;
-        opMode.telemetry.addLine("Intake test Init Started");
+    // Auto Constructor
+    public Intake(LinearOpMode opMode, Sensors sensors) {
+        this.auto = opMode;
+        opMode.telemetry.addLine("Intake Init Started");
         opMode.telemetry.update();
 
-        intakeMotor = this.opMode.hardwareMap.dcMotor.get("intakeMotor");
+        intakeMotor = this.auto.hardwareMap.dcMotor.get("intakeMotor");
+
+        intakeMotor.setDirection(DcMotor.Direction.FORWARD); // tested
+
+        intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
+        this.sensors = sensors;
+
+        opMode.telemetry.addLine("Intake test Init Completed");
+        opMode.telemetry.update();
+    }
+
+    // TeleOp Constructor
+    public Intake(OpMode opMode, Sensors sensors) {
+        this.teleop = opMode;
+
+        teleop.telemetry.addLine("Intake Init Started");
+        teleop.telemetry.update();
+
+        intakeMotor = this.teleop.hardwareMap.dcMotor.get("intakeMotor");
 
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
 
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        opMode.telemetry.addLine("Intake test Init Completed");
-        opMode.telemetry.update();
-
-        sensors = new Sensors(this.opMode, true);
-
-
-    }
-
-    public IntakeTestClass(OpMode opMode) {
-        this.opMode_iterative = opMode;
-        opMode_iterative.telemetry.addLine("Intake test Init Started");
-        opMode_iterative.telemetry.update();
-
-        intakeMotor = this.opMode.hardwareMap.dcMotor.get("intakeMotor");
-
-        intakeMotor.setDirection(DcMotor.Direction.FORWARD);
-
-        intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        this.sensors = sensors;
 
         opMode.telemetry.addLine("Intake test Init Completed");
         opMode.telemetry.update();
-
-        sensors = new Sensors(this.opMode, false);
     }
+
 
     public void intakeTime(double power, double time) {
         ElapsedTime timer = new ElapsedTime();
@@ -57,18 +60,20 @@ public class IntakeTestClass {
     }
 
     public void intakeRing(double power){
-        while (sensors.getTransitionValid()) {
+        while (!sensors.getTransitionValid()) {
             intakeMotor.setPower(power);
         }
         intakeMotor.setPower(0);
     }
 
-    public void test(double power){
-        double powerIncrement = power;
-        intakeMotor.setPower(powerIncrement);
-        if (gamepad.a){
-            powerIncrement += 0.05;
-            intakeMotor.setPower(powerIncrement);
+    // We are looking for a change from F -> T
+    // T -> F
+    // T -> F -> T
+    public void incrementTest(double power, double increment){
+        intakeMotor.setPower(power);
+        if (teleop.gamepad1.a){
+            power += increment;
+            intakeMotor.setPower(power);
         }
 
     }
