@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
-public class Shooter {
+public class Shooter{
     private LinearOpMode opMode;
     private OpMode opMode_iterative;
     private DcMotor shooterMotor; //Outtake Wheels
@@ -143,7 +143,6 @@ public class Shooter {
         setRotationPower(0);
     }*/
 
-    /*
      public static boolean pivotRotation (double currentAngle, double desiredAngle){
         desiredAngle = Math.toRadians(desiredAngle);
         currentAngle = Math.toRadians(currentAngle);
@@ -157,8 +156,8 @@ public class Shooter {
         }
        return ((currentAngle-desiredAngle) > (desiredAngle-currentAngle));
     }
-     */
-    public void pivotRotation (double power, double desiredAngle){
+
+    /*public void pivotRotation (double power, double desiredAngle){
         desiredAngle = Math.toRadians(desiredAngle);
         double currentAngle = sensors.getRotationAngle(); //radians
         if (Math.abs(desiredAngle - currentAngle) > Math.PI) {
@@ -174,7 +173,7 @@ public class Shooter {
             while (desiredAngle > currentAngle){ }
         }
         setRotationPower(0);
-    }
+    } */
 
     public void setShooterAngle(double angle){
         angleChanger.setPosition(angle * SERVO_POSITION_TO_ANGLE_FACTOR);
@@ -213,7 +212,22 @@ public class Shooter {
         ringPusher.setPosition(0);
         shooterMotor.setPower(power);
     }
+    //=====TeleOp Methods=========//
+    /*when shooting:
+    1) intake the ring
+    2) travels up the screw thingi
+    3) reaches the top
+    4) pushed into and out the shooter
+     */
 
-
-
+    public void moveTeleop(double angle, double power, double currentAngle, double desiredAngle){//where are the angles coming from? do I need to set the value in the method
+        if (opMode_iterative.gamepad2.y)
+            pushRingUp(power);
+        if (opMode_iterative.gamepad2.x)
+            pivotRotation(currentAngle,desiredAngle);
+        if (opMode_iterative.gamepad2.right_trigger != 0)
+            setShooterAngle(angle);
+        if (opMode_iterative.gamepad2.left_trigger != 0)
+            shootRing(power);
+    }
 }

@@ -59,7 +59,7 @@ public class Intake {
         intakeMotor.setPower(0);
     }
 
-    public void intakeRing(double power){
+    public void intakeRing(double power) {
         while (!sensors.getTransitionValid()) {
             intakeMotor.setPower(power);
         }
@@ -69,13 +69,30 @@ public class Intake {
     // We are looking for a change from F -> T
     // T -> F
     // T -> F -> T
-    public void incrementTest(double power, double increment){
+    public void incrementTest(double power, double increment) {
         intakeMotor.setPower(power);
-        if (teleop.gamepad1.a){
+        if (teleop.gamepad1.a) {
             power += increment;
             intakeMotor.setPower(power);
         }
 
+    }
+
+    public void setPower(double power) {
+        intakeMotor.setPower(power);
+    }
+
+    public void turnOff() {
+        intakeMotor.setPower(0);
+    }
+
+    public void setNegativePower(double power) {//what would it be used for?
+        intakeMotor.setPower(-power);
+    }
+
+    public void moveTeleop(double power){
+        if (teleop.gamepad2.b)
+            intakeMotor.setPower(power);
     }
 
 }
