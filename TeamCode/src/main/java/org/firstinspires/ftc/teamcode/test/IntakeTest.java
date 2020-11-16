@@ -11,6 +11,8 @@ public class IntakeTest extends OpMode
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private NopeRope robot;
+    private double power = 0.5;
+    private double increment = 0.1;
     private Intake intake;//do i need this if i already have NopeRope
 
     /*
@@ -21,7 +23,7 @@ public class IntakeTest extends OpMode
         telemetry.addData("Status", "Initialized");
 
         robot = new NopeRope(this);
-        intake = new Intake();
+        intake = new Intake(this, null);
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -42,21 +44,12 @@ public class IntakeTest extends OpMode
         runtime.reset();
     }
 
-    /*
-     * Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
-     */
     @Override
-    public void loop(double power, double increment) {
-        robot.teleOpControls();
-
-        intake.setPower(power);
-        intake.setNegativePower(power);
+    public void loop() {
         intake.incrementTest(power,increment);
-        intake.turnOff();
-        intake.moveTeleop(power);
-        intake.intakeRing(power);
-
     }
+
+
 
     /*
      * Code to run ONCE after the driver hits STOP

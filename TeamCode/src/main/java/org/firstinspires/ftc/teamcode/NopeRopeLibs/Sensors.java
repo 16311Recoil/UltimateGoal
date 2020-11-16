@@ -164,7 +164,7 @@ public class Sensors {
     public double getRotationAngle(){
         double currentVal = rotation.getCurrentPosition();
 
-        return 0.0
+        return 0.0;
 
 
     }

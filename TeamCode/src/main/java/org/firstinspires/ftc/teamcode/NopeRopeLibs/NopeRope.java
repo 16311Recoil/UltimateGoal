@@ -30,7 +30,7 @@ public class NopeRope {
         // driver 1 controls the drivetrain
         drivetrain.moveTelop(teleOp.gamepad1.left_stick_x, teleOp.gamepad1.left_stick_y, teleOp.gamepad1.right_stick_x);
         // for shooter <- who controls the shooter? with what methods?
-        shooter.moveTeleop();//parameters?
+        //shooter.moveTeleop(null,null,null,null);//parameters?
         // don't worry about TeleOp vision right now.
 
     }

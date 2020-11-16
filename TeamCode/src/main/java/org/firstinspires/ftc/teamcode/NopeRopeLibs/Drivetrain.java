@@ -17,17 +17,17 @@ public class Drivetrain {
     private DcMotor fl, fr, bl, br;
     private double multiplier;
     private int multiCounter = 1;
-    private double[] multipliers = {0.3, 0.55 , 1};
+    private double[] multipliers = {0.3, 0.55, 1};
     private String[] multipliersTelemetry = {"LOW POWER", "REGULAR POWER", "HIGH POWER"};
 
 
-    public Drivetrain(LinearOpMode opMode, ElapsedTime timer, Map<String, Double> sensorVals) throws InterruptedException {
+    public Drivetrain(LinearOpMode opMode, ElapsedTime timer) throws InterruptedException {
         this.opMode = opMode;
 
-        fl =  this.opMode.hardwareMap.dcMotor.get("fl");
-        fr =  this.opMode.hardwareMap.dcMotor.get("fr");
-        bl =  this.opMode.hardwareMap.dcMotor.get("bl");
-        br =  this.opMode.hardwareMap.dcMotor.get("br");
+        fl = this.opMode.hardwareMap.dcMotor.get("fl");
+        fr = this.opMode.hardwareMap.dcMotor.get("fr");
+        bl = this.opMode.hardwareMap.dcMotor.get("bl");
+        br = this.opMode.hardwareMap.dcMotor.get("br");
 
 
         fr.setDirection(DcMotor.Direction.REVERSE);
@@ -52,11 +52,10 @@ public class Drivetrain {
         opMode_iterative.telemetry.update();
 
 
-
-        fl =  this.opMode_iterative.hardwareMap.dcMotor.get("fl");
-        fr =  this.opMode_iterative.hardwareMap.dcMotor.get("fr");
-        bl =  this.opMode_iterative.hardwareMap.dcMotor.get("bl");
-        br =  this.opMode_iterative.hardwareMap.dcMotor.get("br");
+        fl = this.opMode_iterative.hardwareMap.dcMotor.get("fl");
+        fr = this.opMode_iterative.hardwareMap.dcMotor.get("fr");
+        bl = this.opMode_iterative.hardwareMap.dcMotor.get("bl");
+        br = this.opMode_iterative.hardwareMap.dcMotor.get("br");
 
         fr.setDirection(DcMotor.Direction.REVERSE);
         fl.setDirection(DcMotor.Direction.FORWARD);
@@ -74,63 +73,68 @@ public class Drivetrain {
 
     /* ============================================== UTILITY METHODS ==============================================================*/
 
-    public void setAllMotors(double power){
+    public void setAllMotors(double power) {
         fl.setPower(power);
         fr.setPower(power);
         bl.setPower(power);
         br.setPower(power);
     }
 
-    public void turn(double power, boolean turnRight){
+    public void turn(double power, boolean turnRight) {
         int turnMultiplier = -1;
-        if (turnRight){
+        if (turnRight) {
             turnMultiplier = 1;
         }
-        fl.setPower(power*turnMultiplier);
-        fr.setPower(-power*turnMultiplier);
-        bl.setPower(power*turnMultiplier);
-        br.setPower(-power*turnMultiplier);
+        fl.setPower(power * turnMultiplier);
+        fr.setPower(-power * turnMultiplier);
+        bl.setPower(power * turnMultiplier);
+        br.setPower(-power * turnMultiplier);
     }
 
-    public double getDistance(){
+    public double getDistance() {
         return 0;
         //placeholder for odom method in sensors class - REMOVE AFTER REAL METHOD IMPLEMENTED
         //Ctrl F marker for methods that need to be updated
     }
 
-    public double getAngle(){
+    public double getAngle() {
         return 0;
         //placeholder for odom method in sensors class - REMOVE AFTER REAL METHOD IMPLEMENTED
         //Ctrl F marker for methods that need to be updated
     }
 
-    public void moveForward(double distance, double power, double timeout){
+    public void moveForward(double distance, double power, double timeout) {
         double currentPos = getDistance();
         ElapsedTime timer = new ElapsedTime();
-        while (timer.seconds() < timeout && currentPos < distance){
+        while (timer.seconds() < timeout && currentPos < distance) {
             currentPos = getDistance();
             setAllMotors(power);
         }
         setAllMotors(0);
     }
 
-    public void turnTo (double power, double desiredAngle, double timeout){
+    public void turnTo(double power, double desiredAngle, double timeout) {
         ElapsedTime timer = new ElapsedTime();
         double currentAngle = getAngle(); //radians
         if (Math.abs(desiredAngle - currentAngle) > Math.PI) {
             desiredAngle += 360;
         }
-        boolean turnRight = ((currentAngle-desiredAngle) < (desiredAngle-currentAngle));
-        if (turnRight){
+        boolean turnRight = ((currentAngle - desiredAngle) < (desiredAngle - currentAngle));
+        if (turnRight) {
             turn(power, true);
-            while ((currentAngle > desiredAngle) && (timer.seconds() < timeout)){ }
-        }
-        else {
+            while ((currentAngle > desiredAngle) && (timer.seconds() < timeout)) {
+            }
+        } else {
             turn(power, false);
-            while ((desiredAngle > currentAngle) && (timer.seconds() < timeout)){ }
+            while ((desiredAngle > currentAngle) && (timer.seconds() < timeout)) {
+            }
         }
         setAllMotors(0);
     }
+
+
+
+
 
     //================================================================= Tele-Op Methods ===============================================================//
 
