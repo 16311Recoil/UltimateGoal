@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.NopeRopeLibs;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.internal.android.dx.ssa.EscapeAnalysis;
@@ -15,13 +16,13 @@ public class Drivetrain {
     public LinearOpMode opMode;
     public OpMode opMode_iterative;
     private DcMotor fl, fr, bl, br;
-    private double multiplier;
+    private double multiplier = 1;
     private int multiCounter = 1;
     private double[] multipliers = {0.3, 0.55, 1};
     private String[] multipliersTelemetry = {"LOW POWER", "REGULAR POWER", "HIGH POWER"};
 
 
-    public Drivetrain(LinearOpMode opMode, ElapsedTime timer) throws InterruptedException {
+    public Drivetrain(LinearOpMode opMode) throws InterruptedException {
         this.opMode = opMode;
 
         fl = this.opMode.hardwareMap.dcMotor.get("fl");
@@ -31,9 +32,9 @@ public class Drivetrain {
 
 
         fr.setDirection(DcMotor.Direction.REVERSE);
-        fl.setDirection(DcMotor.Direction.FORWARD);
+        fl.setDirection(DcMotor.Direction.REVERSE);
         br.setDirection(DcMotor.Direction.REVERSE);
-        bl.setDirection(DcMotor.Direction.FORWARD);
+        bl.setDirection(DcMotor.Direction.REVERSE);
 
 
         fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -41,11 +42,18 @@ public class Drivetrain {
         bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        opMode.telemetry.addLine("Drivetrain Init Completed");
+        fl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        br.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+
+
+        opMode.telemetry.addLine("Drivetrain Init Completed1");
         opMode.telemetry.update();
     }
 
-    public Drivetrain(OpMode opMode, ElapsedTime timer, Map<String, Double> sensorVals) throws InterruptedException {
+    public Drivetrain(OpMode opMode, Map<String, Double> sensorVals) throws InterruptedException {
         this.opMode_iterative = opMode;
 
         opMode_iterative.telemetry.addLine("Drivetrain update");
@@ -58,9 +66,9 @@ public class Drivetrain {
         br = this.opMode_iterative.hardwareMap.dcMotor.get("br");
 
         fr.setDirection(DcMotor.Direction.REVERSE);
-        fl.setDirection(DcMotor.Direction.FORWARD);
+        fl.setDirection(DcMotor.Direction.REVERSE);
         br.setDirection(DcMotor.Direction.REVERSE);
-        bl.setDirection(DcMotor.Direction.FORWARD);
+        bl.setDirection(DcMotor.Direction.REVERSE);
 
         fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -132,6 +140,13 @@ public class Drivetrain {
         setAllMotors(0);
     }
 
+    public void move(double v_d, double netTheta, double z){
+        fl.setPower( (v_d * (Math.sin((netTheta)))) + v_d * Math.cos(netTheta) - z);
+        fr.setPower((v_d * (Math.sin((netTheta)))) - v_d * Math.cos(netTheta) + z);
+        bl.setPower((v_d * (Math.sin((netTheta)))) - v_d * Math.cos(netTheta) - z);
+        br.setPower(v_d*Math.sin(netTheta) + (v_d * (Math.cos((netTheta)))) + z);
+    }
+
 
 
 
@@ -145,7 +160,7 @@ public class Drivetrain {
             v_d = 0;
         if (v_d > 0.95)
             v_d = 1;
-        toggleSpeed();
+        //toggleSpeed();
         fl.setPower(multiplier * (v_d * (Math.sin((netTheta) + Math.PI / 4))) - z);
         fr.setPower(multiplier * (v_d * (Math.sin((netTheta) + Math.PI / 4))) + z);
         bl.setPower(multiplier * (v_d * (Math.cos((netTheta) + Math.PI / 4))) - z);

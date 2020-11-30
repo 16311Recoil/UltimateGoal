@@ -1,12 +1,15 @@
 package org.firstinspires.ftc.teamcode.test;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.Drivetrain;
 
-public class DrivetrainTest extends LinearOpMode {
 
+@Autonomous(name="DriveTest", group="Linear Opmode")
+public class DrivetrainTest extends LinearOpMode {
     private Drivetrain drivetraint;
     private ElapsedTime timer;
     private double power = 0.5;
@@ -15,14 +18,68 @@ public class DrivetrainTest extends LinearOpMode {
 
 
     public void runOpMode() throws InterruptedException {
-        drivetraint = new Drivetrain(this, timer);
+        drivetraint = new Drivetrain(this);
         timer = new ElapsedTime();
-        waitForStart();
 
-        while (timer.milliseconds() > 2000){
-            drivetraint.moveTelop(power * Math.cos(angle), power * Math.sin(angle), 0);
+        waitForStart();
+        timer.reset();
+
+        while (timer.milliseconds() < 2000){
+
+            drivetraint.move(power, Math.toRadians(90), 0);
 
         }
+        timer.reset();
+
+        while (timer.milliseconds() < 500){
+
+            drivetraint.setAllMotors(0);
+
+        }
+        timer.reset();
+
+        while (timer.milliseconds() < 2000){
+
+            drivetraint.move(power, Math.toRadians(180), 0);
+
+        }
+        timer.reset();
+
+        while (timer.milliseconds() < 500){
+
+            drivetraint.setAllMotors(0);
+
+        }
+        timer.reset();
+
+        while (timer.milliseconds() < 2000){
+
+            drivetraint.move(power, Math.toRadians(270), 0);
+
+        }
+        timer.reset();
+
+        while (timer.milliseconds() < 500){
+
+            drivetraint.setAllMotors(0);
+
+        }
+        timer.reset();
+
+        while (timer.milliseconds() < 2000){
+
+            drivetraint.move(power, Math.toRadians(0), 0);
+
+        }
+        timer.reset();
+
+
+        while (timer.milliseconds() < 500){
+
+            drivetraint.setAllMotors(0);
+
+        }
+        timer.reset();
 
         drivetraint.setAllMotors(0);
     }

@@ -20,7 +20,7 @@ public class moveTest extends OpMode {
         telemetry.addData("Status", "Initialized");
 
             try {
-                dt = new Drivetrain(this,runtime,null);
+                dt = new Drivetrain(this,null);
             } catch (InterruptedException e) {
                 telemetry.addData("Status", "FAILED INIT");
             }

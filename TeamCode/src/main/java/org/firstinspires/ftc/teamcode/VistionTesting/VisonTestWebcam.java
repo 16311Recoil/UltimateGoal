@@ -3,6 +3,10 @@ package org.firstinspires.ftc.teamcode.VistionTesting;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -15,33 +19,35 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.openftc.easyopencv.OpenCvPipeline;
 
-@TeleOp
-public class VisionTest extends LinearOpMode {
-    OpenCvCamera phoneCam;
+public class VisonTestWebcam extends LinearOpMode
+{
+    OpenCvCamera webcam;
 
     @Override
     public void runOpMode()
     {
         /*
          * Instantiate an OpenCvCamera object for the camera we'll be using.
-         * In this sample, we're using the phone's internal camera. We pass it a
-         * CameraDirection enum indicating whether to use the front or back facing
-         * camera, as well as the view that we wish to use for camera monitor (on
+         * In this sample, we're using a webcam. Note that you will need to
+         * make sure you have added the webcam to your configuration file and
+         * adjusted the name here to match what you named it in said config file.
+         *
+         * We pass it the view that we wish to use for camera monitor (on
          * the RC phone). If no camera monitor is desired, use the alternate
          * single-parameter constructor instead (commented out below)
          */
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
 
         // OR...  Do Not Activate the Camera Monitor View
-        //phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK);
+        //webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"));
 
         /*
          * Specify the image processing pipeline we wish to invoke upon receipt
          * of a frame from the camera. Note that switching pipelines on-the-fly
          * (while a streaming session is in flight) *IS* supported.
          */
-        phoneCam.setPipeline(new SamplePipeline());
+        webcam.setPipeline(new SamplePipeline());
 
         /*
          * Open the connection to the camera device. New in v1.4.0 is the ability
@@ -52,23 +58,28 @@ public class VisionTest extends LinearOpMode {
          *
          * If you really want to open synchronously, the old method is still available.
          */
-        phoneCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
             @Override
             public void onOpened()
             {
                 /*
-                 * Tell the camera to start streaming images to us! Note that you must make sure
+                 * Tell the webcam to start streaming images to us! Note that you must make sure
                  * the resolution you specify is supported by the camera. If it is not, an exception
                  * will be thrown.
                  *
-                 * Also, we specify the rotation that the camera is used in. This is so that the image
+                 * Keep in mind that the SDK's UVC driver (what OpenCvWebcam uses under the hood) only
+                 * supports streaming from the webcam in the uncompressed YUV image format. This means
+                 * that the maximum resolution you can stream at and still get up to 30FPS is 480p (640x480).
+                 * Streaming at e.g. 720p will limit you to up to 10FPS and so on and so forth.
+                 *
+                 * Also, we specify the rotation that the webcam is used in. This is so that the image
                  * from the camera sensor can be rotated such that it is always displayed with the image upright.
                  * For a front facing camera, rotation is defined assuming the user is looking at the screen.
                  * For a rear facing camera or a webcam, rotation is defined assuming the camera is facing
                  * away from the user.
                  */
-                phoneCam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+                webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
             }
         });
 
@@ -85,15 +96,12 @@ public class VisionTest extends LinearOpMode {
             /*
              * Send some stats to the telemetry
              */
-            telemetry.addData("Frame Count", phoneCam.getFrameCount());
-            telemetry.addData("FPS", String.format("%.2f", phoneCam.getFps()));
-            telemetry.addData("Total frame time ms", phoneCam.getTotalFrameTimeMs());
-            telemetry.addData("Pipeline time ms", phoneCam.getPipelineTimeMs());
-            telemetry.addData("Overhead time ms", phoneCam.getOverheadTimeMs());
-            telemetry.addData("Theoretical max FPS", phoneCam.getCurrentPipelineMaxFps());
-            telemetry.addData("RingStackSize", SamplePipeline.getStackSize());
-            telemetry.addData("avg1", SamplePipeline.getAvg1());
-            telemetry.addData("avg2", SamplePipeline.getAvg2());
+            telemetry.addData("Frame Count", webcam.getFrameCount());
+            telemetry.addData("FPS", String.format("%.2f", webcam.getFps()));
+            telemetry.addData("Total frame time ms", webcam.getTotalFrameTimeMs());
+            telemetry.addData("Pipeline time ms", webcam.getPipelineTimeMs());
+            telemetry.addData("Overhead time ms", webcam.getOverheadTimeMs());
+            telemetry.addData("Theoretical max FPS", webcam.getCurrentPipelineMaxFps());
             telemetry.update();
 
             /*
@@ -122,8 +130,8 @@ public class VisionTest extends LinearOpMode {
                  * time. Of course, this comment is irrelevant in light of the use case described in
                  * the above "important note".
                  */
-                phoneCam.stopStreaming();
-                //phoneCam.closeCameraDevice();
+                webcam.stopStreaming();
+                //webcam.closeCameraDevice();
             }
 
             /*
@@ -154,21 +162,22 @@ public class VisionTest extends LinearOpMode {
     {
         boolean viewportPaused;
 
-        static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(109,128);
+        static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(109,98);
         static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(109,198);
-        static final int UPPER_ORANGE_THRESHOLD =  100; //test
-        static final int LOWER_ORANGE_THRESHOLD =  0; //test
+        static final int COLOR_THRESHOLD = 0; //test
         static final Scalar BLUE = new Scalar(0, 0, 255);
 
-        static final int REGION_WIDTH = 80;
+        static final int REGION_WIDTH = 20;
         static final int REGION_HEIGHT = 20;
 
-        Mat Cb = new Mat();
+        Mat Cr = new Mat();
         Mat YCrCb = new Mat();
         Mat ringTop = new Mat();
         Mat ringBot = new Mat();
-        static int avg1, avg2;
-        public static int stackSize = 0;
+        int avg1, avg2;
+        boolean topPresent;
+        boolean botPresent;
+        int stackSize;
 
         Point region1_pointA = new Point(
                 REGION1_TOPLEFT_ANCHOR_POINT.x,
@@ -183,10 +192,10 @@ public class VisionTest extends LinearOpMode {
                 REGION2_TOPLEFT_ANCHOR_POINT.x + REGION_WIDTH,
                 REGION2_TOPLEFT_ANCHOR_POINT.y + REGION_HEIGHT);
 
-        void inputToCb(Mat input)
+        void inputToCr(Mat input)
         {
             Imgproc.cvtColor(input, YCrCb, Imgproc.COLOR_RGB2YCrCb);
-            Core.extractChannel(YCrCb, Cb, 2);
+            Core.extractChannel(YCrCb, Cr, 1);
         }
 
 
@@ -202,15 +211,15 @@ public class VisionTest extends LinearOpMode {
              * buffer would be re-allocated the first time a real frame
              * was crunched)
              */
-            inputToCb(firstFrame);
+            inputToCr(firstFrame);
 
             /*
              * Submats are a persistent reference to a region of the parent
              * buffer. Any changes to the child affect the parent, and the
              * reverse also holds true.
              */
-            ringTop = Cb.submat(new Rect(region1_pointA, region1_pointB));
-            ringBot = Cb.submat(new Rect(region2_pointA, region2_pointB));
+            ringTop = Cr.submat(new Rect(region1_pointA, region1_pointB));
+            ringBot = Cr.submat(new Rect(region2_pointA, region2_pointB));
         }
 
         /*
@@ -232,18 +241,16 @@ public class VisionTest extends LinearOpMode {
              * of this particular frame for later use, you will need to either clone it or copy
              * it to another Mat.
              */
-            inputToCb(input);
-            stackSize = 0;
+            inputToCr(input);
 
             avg1 = (int) Core.mean(ringTop).val[0];
             avg2 = (int) Core.mean(ringBot).val[0];
 
-            if(UPPER_ORANGE_THRESHOLD > avg1 && avg1 > LOWER_ORANGE_THRESHOLD){
+            if(avg1 > COLOR_THRESHOLD){
                 stackSize += 3;
             }
 
-
-            if (UPPER_ORANGE_THRESHOLD > avg2 && avg2 > LOWER_ORANGE_THRESHOLD){
+            if (avg2 > COLOR_THRESHOLD){
                 stackSize ++;
             }
 
@@ -256,8 +263,8 @@ public class VisionTest extends LinearOpMode {
 
             Imgproc.rectangle(
                     input, // Buffer to draw on
-                    region2_pointA, // First point which defines the rectangle
-                    region2_pointB, // Second point which defines the rectangle
+                    region1_pointA, // First point which defines the rectangle
+                    region1_pointB, // Second point which defines the rectangle
                     BLUE, // The color the rectangle is drawn in
                     2); // Thickness of the rectangle lines
 
@@ -268,18 +275,9 @@ public class VisionTest extends LinearOpMode {
              * to change which stage of the pipeline is rendered to the viewport when it is
              * tapped, please see {@link PipelineStageSwitchingExample}
              */
-            Mat yCbCrChan2Mat = new Mat();
-            Imgproc.cvtColor(input, yCbCrChan2Mat, Imgproc.COLOR_RGB2YCrCb);
-            Core.extractChannel(yCbCrChan2Mat, yCbCrChan2Mat, 2);
 
-            return yCbCrChan2Mat;
+            return input;
         }
-
-        public static int getStackSize(){
-            return stackSize;
-        }
-        public static int getAvg1(){return avg1;}
-        public static int getAvg2(){return avg2;}
 
 
     }
