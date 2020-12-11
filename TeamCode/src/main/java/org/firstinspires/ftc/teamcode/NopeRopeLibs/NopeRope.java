@@ -26,6 +26,7 @@ public class NopeRope {
     public NopeRope(OpMode opMode){
     }
 
+
     public void teleOpControls(){
         // driver 1 controls the drivetrain
         drivetrain.moveTelop(teleOp.gamepad1.left_stick_x, teleOp.gamepad1.left_stick_y, teleOp.gamepad1.right_stick_x);

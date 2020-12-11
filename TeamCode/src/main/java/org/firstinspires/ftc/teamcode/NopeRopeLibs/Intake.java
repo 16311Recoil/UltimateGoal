@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.NopeRopeLibs;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -21,7 +22,8 @@ public class Intake {
 
         intakeMotor = this.auto.hardwareMap.dcMotor.get("intakeMotor");
 
-        intakeMotor.setDirection(DcMotor.Direction.FORWARD); // tested
+        intakeMotor.setDirection(DcMotor.Direction.REVERSE);
+        //* Changing the MODE -> velocity PID
 
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
@@ -66,6 +68,7 @@ public class Intake {
         intakeMotor.setPower(0);
     }
 
+    // Debounce? How do we fix debounce?
     // We are looking for a change from F -> T
     // T -> F
     // T -> F -> T
@@ -75,7 +78,6 @@ public class Intake {
             power += increment;
             intakeMotor.setPower(power);
         }
-
     }
 
     public void setPower(double power) {
@@ -86,13 +88,18 @@ public class Intake {
         intakeMotor.setPower(0);
     }
 
-    public void setNegativePower(double power) {//what would it be used for?
-        intakeMotor.setPower(-power);
-    }
+    /*
+       Questions to consider
+            - If i put this in a loop, what does the driver have to do to intake?
+                Assume you fix debounce
+                - Hold down Key (1), Count (2), Release Key(3)
+            - Functionalities the driver needs?
 
+     */
     public void moveTeleop(double power){
-        if (teleop.gamepad2.b)
+        if (teleop.gamepad2.b)// debounce issue
             intakeMotor.setPower(power);
+        turnOff();
     }
 
 }
