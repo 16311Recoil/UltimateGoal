@@ -26,7 +26,12 @@ public class NopeRope {
     public NopeRope(OpMode opMode) {
     }
 
+<<<<<<< HEAD
     public void teleOpControls() {
+=======
+
+    public void teleOpControls(){
+>>>>>>> 2ab2c7c33d75a48c7f5361b18b09b35f03cc78c0
         // driver 1 controls the drivetrain
         drivetrain.moveTelop(teleOp.gamepad1.left_stick_x, teleOp.gamepad1.left_stick_y, teleOp.gamepad1.right_stick_x);
         // for shooter <- who controls the shooter? with what methods?
