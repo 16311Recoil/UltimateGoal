@@ -102,4 +102,15 @@ public class Intake {
         turnOff();
     }
 
+    public void intakeControls(double power){
+        if (teleop.gamepad1.right_trigger > 0)
+            intakeMotor.setPower(power);
+        else if (teleop.gamepad2.right_trigger > 0)
+            intakeMotor.setPower(power);
+        if (teleop.gamepad1.left_trigger > 0)
+            turnOff(); //?
+        else if (teleop.gamepad2.left_trigger > 0)
+            turnOff(); //?
+    }
+
 }

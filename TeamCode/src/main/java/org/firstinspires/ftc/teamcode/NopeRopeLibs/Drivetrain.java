@@ -184,4 +184,20 @@ public class Drivetrain {
         opMode_iterative.telemetry.update();
     }
 
+    public void drivetrainControls(double distance, double power, double timeout){
+        if (opMode_iterative.gamepad1.dpad_up)
+            setAllMotors(power);
+        if (opMode_iterative.gamepad1.dpad_down)
+            setAllMotors(power/2);
+        if (opMode_iterative.gamepad1.left_stick_y > 0)
+            moveForward(distance, power, timeout); //?
+        if (opMode_iterative.gamepad1.left_stick_y < 0)
+            moveForward(distance, power, timeout); //?
+        if (opMode_iterative.gamepad1.left_stick_x < 0)
+            //strafes left
+        if (opMode_iterative.gamepad1.left_stick_x > 0)
+            //strafes right
+
+    }
+
 }

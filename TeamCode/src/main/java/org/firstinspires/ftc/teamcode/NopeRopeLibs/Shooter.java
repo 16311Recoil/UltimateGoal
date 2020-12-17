@@ -229,5 +229,47 @@ public class Shooter{
             setShooterAngle(angle);
         if (opMode_iterative.gamepad2.left_trigger != 0)
             shootRing(power);
+        if (opMode_iterative.gamepad2.x)
+            setShooterPower(power);
+        if (opMode_iterative.gamepad2.y)
+            //toggles ring pusher
     }
+
+    public void screwsControls(double power){
+        if (opMode_iterative.gamepad2.b)
+            setScrewPower(-power);
+        if (opMode_iterative.gamepad2.a)
+            setScrewPower(power);
+    }
+
+    public void shooterControls(double power, double angle){
+        if (opMode_iterative.gamepad1.x)
+            setShooterPower(power);
+        else if (opMode_iterative.gamepad2.x)
+            setShooterPower(power);
+        else if (opMode_iterative.gamepad2.right_bumper)
+            setShooterPower(power);
+        if (opMode_iterative.gamepad1.left_bumper)
+            setShooterAngle(angle); //turns shooter left
+        else if (opMode_iterative.gamepad2.left_bumper)
+            setShooterAngle(angle);
+        if (opMode_iterative.gamepad1.right_bumper)
+            setShooterAngle(angle); //turns shooter right
+        if (opMode_iterative.gamepad2.left_stick_x < 0)
+            setRotationPower(power); //move shooter left
+        if (opMode_iterative.gamepad2.left_stick_x > 0)
+            setRotationPower(power); //move shooter right
+    }
+
+    public void rampControls(double power, double position){
+        if (opMode_iterative.gamepad1.b)
+            angleChanger.setPosition(position); //angles ramp up
+        else if (opMode_iterative.gamepad2.right_stick_y > 0)
+            angleChanger.setPosition(position);
+        if (opMode_iterative.gamepad1.a)
+            angleChanger.setPosition(position); //angles ramp down
+        else if (opMode_iterative.gamepad2.right_stick_y < 0)
+            angleChanger.setPosition(position);
+    }
+
 }
