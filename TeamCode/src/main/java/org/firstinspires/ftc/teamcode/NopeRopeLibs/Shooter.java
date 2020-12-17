@@ -212,6 +212,15 @@ public class Shooter{
         ringPusher.setPosition(0);
         shooterMotor.setPower(power);
     }
+
+    public void incrementTest(double power, double increment){
+        screwMotor.setPower(power);
+        if (opMode_iterative.gamepad1.a){
+            power += increment;
+            screwMotor.setPower(power);
+        }
+    }
+
     //=====TeleOp Methods=========//
     /*when shooting:
     1) intake the ring
