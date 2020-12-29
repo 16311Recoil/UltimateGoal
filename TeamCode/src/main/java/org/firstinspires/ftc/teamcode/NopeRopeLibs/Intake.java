@@ -96,11 +96,6 @@ public class Intake {
             - Functionalities the driver needs?
 
      */
-    public void moveTeleop(double power){
-        if (teleop.gamepad2.b)// debounce issue
-            intakeMotor.setPower(power);
-        turnOff();
-    }
 
     public void intakeControls(double power){
         if (teleop.gamepad1.right_trigger > 0)
@@ -108,9 +103,9 @@ public class Intake {
         else if (teleop.gamepad2.right_trigger > 0)
             intakeMotor.setPower(power);
         if (teleop.gamepad1.left_trigger > 0)
-            turnOff(); //?
+            intakeMotor.setPower(-power);
         else if (teleop.gamepad2.left_trigger > 0)
-            turnOff(); //?
+            intakeMotor.setPower(-power);
     }
 
 }

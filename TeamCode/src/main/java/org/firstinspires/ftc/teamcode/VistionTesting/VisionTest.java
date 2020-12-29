@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.VistionTesting;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -94,6 +95,9 @@ public class VisionTest extends LinearOpMode {
             telemetry.addData("RingStackSize", SamplePipeline.getStackSize());
             telemetry.addData("avg1", SamplePipeline.getAvg1());
             telemetry.addData("avg2", SamplePipeline.getAvg2());
+            telemetry.addData("Count:", SamplePipeline.getLoopCount());
+            telemetry.addData("Time:",SamplePipeline.getTime());
+            telemetry.addData("Time:", SamplePipeline.getLoopCount() / SamplePipeline.getTime());
             telemetry.update();
 
             /*
@@ -159,6 +163,9 @@ public class VisionTest extends LinearOpMode {
         static final int UPPER_ORANGE_THRESHOLD =  100; //test
         static final int LOWER_ORANGE_THRESHOLD =  0; //test
         static final Scalar BLUE = new Scalar(0, 0, 255);
+        static int loopCount = 0;
+        ElapsedTime timer = new ElapsedTime();
+        static double time = 0;
 
         static final int REGION_WIDTH = 80;
         static final int REGION_HEIGHT = 20;
@@ -211,6 +218,7 @@ public class VisionTest extends LinearOpMode {
              */
             ringTop = Cb.submat(new Rect(region1_pointA, region1_pointB));
             ringBot = Cb.submat(new Rect(region2_pointA, region2_pointB));
+            timer.reset();
         }
 
         /*
@@ -232,6 +240,7 @@ public class VisionTest extends LinearOpMode {
              * of this particular frame for later use, you will need to either clone it or copy
              * it to another Mat.
              */
+
             inputToCb(input);
             stackSize = 0;
 
@@ -272,6 +281,8 @@ public class VisionTest extends LinearOpMode {
             Imgproc.cvtColor(input, yCbCrChan2Mat, Imgproc.COLOR_RGB2YCrCb);
             Core.extractChannel(yCbCrChan2Mat, yCbCrChan2Mat, 2);
 
+            loopCount++;
+            time = timer.seconds();
             return yCbCrChan2Mat;
         }
 
@@ -280,6 +291,8 @@ public class VisionTest extends LinearOpMode {
         }
         public static int getAvg1(){return avg1;}
         public static int getAvg2(){return avg2;}
+        public static int getLoopCount(){return loopCount;}
+        public static double getTime(){return time;}
 
 
     }

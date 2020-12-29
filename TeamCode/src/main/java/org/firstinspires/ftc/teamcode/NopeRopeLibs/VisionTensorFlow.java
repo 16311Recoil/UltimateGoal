@@ -32,6 +32,7 @@ package org.firstinspires.ftc.teamcode.NopeRopeLibs;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
@@ -83,6 +84,7 @@ public class VisionTensorFlow extends LinearOpMode {
      * Detection engine.
      */
     private TFObjectDetector tfod;
+    private int loopCount = 0;
 
     @Override
     public void runOpMode() {
@@ -115,13 +117,15 @@ public class VisionTensorFlow extends LinearOpMode {
         waitForStart();
 
         if (opModeIsActive()) {
+            ElapsedTime timer = new ElapsedTime();
             while (opModeIsActive()) {
                 if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
                     // the last time that call was made.
                     List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
                     if (updatedRecognitions != null) {
-                      telemetry.addData("# Object Detected", updatedRecognitions.size());
+
+
 
                       // step through the list of recognitions and display boundary info.
                       int i = 0;
@@ -131,6 +135,11 @@ public class VisionTensorFlow extends LinearOpMode {
                                           recognition.getLeft(), recognition.getTop());
                         telemetry.addData(String.format("  right,bottom (%d)", i), "%.03f , %.03f",
                                 recognition.getRight(), recognition.getBottom());
+                          loopCount++;
+                          telemetry.addData("Count: ", loopCount);
+                          telemetry.addData("Timer: ", timer.seconds());
+                          telemetry.addData("LPS: ", loopCount / timer.seconds());
+                          telemetry.addData("# Object Detected", updatedRecognitions.size());
                       }
                       telemetry.update();
                     }

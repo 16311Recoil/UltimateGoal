@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.internal.android.dx.ssa.EscapeAnalysis;
 
@@ -161,10 +162,10 @@ public class Drivetrain {
         if (v_d > 0.95)
             v_d = 1;
         //toggleSpeed();
-        fl.setPower(multiplier * (v_d * (Math.sin((netTheta) + Math.PI / 4))) - z);
-        fr.setPower(multiplier * (v_d * (Math.sin((netTheta) + Math.PI / 4))) + z);
-        bl.setPower(multiplier * (v_d * (Math.cos((netTheta) + Math.PI / 4))) - z);
-        br.setPower(multiplier * (v_d * (Math.cos((netTheta) + Math.PI / 4))) + z);
+        fl.setPower(Range.clip(y + x - z, -1, 1));
+        fr.setPower(Range.clip(y - x + z, -1, 1));
+        bl.setPower(Range.clip(y - x - z, -1, 1));
+        br.setPower(Range.clip(y + x + z, -1, 1));
     }
 
 
@@ -184,20 +185,5 @@ public class Drivetrain {
         opMode_iterative.telemetry.update();
     }
 
-    public void drivetrainControls(double distance, double power, double timeout){
-        if (opMode_iterative.gamepad1.dpad_up)
-            setAllMotors(power);
-        if (opMode_iterative.gamepad1.dpad_down)
-            setAllMotors(power/2);
-        if (opMode_iterative.gamepad1.left_stick_y > 0)
-            moveForward(distance, power, timeout); //?
-        if (opMode_iterative.gamepad1.left_stick_y < 0)
-            moveForward(distance, power, timeout); //?
-        if (opMode_iterative.gamepad1.left_stick_x < 0)
-            //strafes left
-        if (opMode_iterative.gamepad1.left_stick_x > 0)
-            //strafes right
-
-    }
 
 }

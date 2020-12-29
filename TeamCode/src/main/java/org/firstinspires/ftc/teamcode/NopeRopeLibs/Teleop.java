@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.NopeRopeLibs;
 
+import com.acmerobotics.roadrunner.drive.Drive;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 
@@ -9,6 +10,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+
+import java.util.HashMap;
 
 /**
  * This file contains an example of an iterative (Non-Linear) "OpMode".
@@ -31,7 +34,7 @@ public class Teleop extends OpMode
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private NopeRope robot;
-    Intake intake;
+    private Drivetrain dt;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -39,8 +42,12 @@ public class Teleop extends OpMode
     @Override
     public void init() {
         telemetry.addData("Status", "Initialized");
-        intake = new Intake(this, null);
-        robot = new NopeRope(this);
+        robot = new NopeRope();
+        try {
+            dt = new Drivetrain(this, new HashMap<>());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
 
@@ -60,7 +67,7 @@ public class Teleop extends OpMode
     @Override
     public void start() {
         runtime.reset();
-        intake.incrementTest(1,0);
+
     }
 
     /*
@@ -68,6 +75,7 @@ public class Teleop extends OpMode
      */
     @Override
     public void loop() {
+        dt.moveTelop(-gamepad1.left_stick_x, gamepad1.right_stick_x, -gamepad1.left_stick_y);
     }
 
     /*

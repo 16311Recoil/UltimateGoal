@@ -21,7 +21,12 @@ public class Shooter{
     Sensors sensors;
 
     private final double SERVO_POSITION_TO_ANGLE_FACTOR = 0; //Test for later
+    private final double PUSH_OUT = 0;
+    private final double PUSH_IN = 0;
     boolean push = true;
+
+    private double rampAngleTeleOP = 0;
+
 
 
     public Shooter(LinearOpMode opMode) {
@@ -157,23 +162,6 @@ public class Shooter{
        return ((currentAngle-desiredAngle) > (desiredAngle-currentAngle));
     }
 
-    /*public void pivotRotation (double power, double desiredAngle){
-        desiredAngle = Math.toRadians(desiredAngle);
-        double currentAngle = sensors.getRotationAngle(); //radians
-        if (Math.abs(desiredAngle - currentAngle) > Math.PI) {
-            desiredAngle += Math.PI * 2;
-        }
-        boolean turnRight = ((currentAngle-desiredAngle) < (desiredAngle-currentAngle));
-        if (turnRight){
-            setRotationPower(power);
-            while (currentAngle > desiredAngle){ }
-        }
-        else {
-            setRotationPower(-power);
-            while (desiredAngle > currentAngle){ }
-        }
-        setRotationPower(0);
-    } */
 
     public void setShooterAngle(double angle){
         angleChanger.setPosition(angle * SERVO_POSITION_TO_ANGLE_FACTOR);
@@ -181,8 +169,12 @@ public class Shooter{
 
     public void togglePusher(){
         if (push){
-
+            ringPusher.setPosition(PUSH_OUT);
         }
+        else {
+            ringPusher.setPosition(PUSH_IN);
+        }
+        push = !push;
     }
 
     public void pushRingUp(double power) {
@@ -228,20 +220,20 @@ public class Shooter{
     3) reaches the top
     4) pushed into and out the shooter
      */
+    public void fullControls(double screwPower, double shooterPower, double rotationPower, double rotationMultiplier, double rampAngleIncrement, double rampAngleMultiplier){
+        pusherAndGrabberControls();
+        screwsControls(screwPower);
+        shooterControls(shooterPower, rotationPower, rotationMultiplier);
+        rampControls(rampAngleIncrement, rampAngleMultiplier);
+    }
 
-    public void moveTeleop(double angle, double power, double currentAngle, double desiredAngle){//where are the angles coming from? do I need to set the value in the method
+    public void pusherAndGrabberControls(){
         if (opMode_iterative.gamepad2.y)
-            pushRingUp(power);
-        if (opMode_iterative.gamepad2.x)
-            pivotRotation(currentAngle,desiredAngle);
-        if (opMode_iterative.gamepad2.right_trigger != 0)
-            setShooterAngle(angle);
-        if (opMode_iterative.gamepad2.left_trigger != 0)
-            shootRing(power);
-        if (opMode_iterative.gamepad2.x)
-            setShooterPower(power);
-        if (opMode_iterative.gamepad2.y)
-            //toggles ring pusher
+            togglePusher();
+        if (opMode_iterative.gamepad1.y)
+            //wobble grabber controls
+        if (opMode_iterative.gamepad2.dpad_down)
+            //wobble grabber controls
     }
 
     public void screwsControls(double power){
@@ -251,34 +243,29 @@ public class Shooter{
             setScrewPower(power);
     }
 
-    public void shooterControls(double power, double angle){
+    public void shooterControls(double shooterPower, double rotationPower, double rotationMultiplier){
         if (opMode_iterative.gamepad1.x)
-            setShooterPower(power);
+            setShooterPower(shooterPower);
         else if (opMode_iterative.gamepad2.x)
-            setShooterPower(power);
+            setShooterPower(shooterPower);
         else if (opMode_iterative.gamepad2.right_bumper)
-            setShooterPower(power);
+            setShooterPower(shooterPower);
         if (opMode_iterative.gamepad1.left_bumper)
-            setShooterAngle(angle); //turns shooter left
-        else if (opMode_iterative.gamepad2.left_bumper)
-            setShooterAngle(angle);
+            setRotationPower(-shooterPower); //turns shooter left
         if (opMode_iterative.gamepad1.right_bumper)
-            setShooterAngle(angle); //turns shooter right
-        if (opMode_iterative.gamepad2.left_stick_x < 0)
-            setRotationPower(power); //move shooter left
-        if (opMode_iterative.gamepad2.left_stick_x > 0)
-            setRotationPower(power); //move shooter right
+            setRotationPower(rotationPower); //turns shooter right
+        if (opMode_iterative.gamepad2.left_stick_x != 0)
+            setRotationPower(opMode_iterative.gamepad2.left_stick_x * rotationMultiplier); //move shooter left
     }
 
-    public void rampControls(double power, double position){
+    public void rampControls(double rampAngleIncrement, double rampAngleMultiplier){
         if (opMode_iterative.gamepad1.b)
-            angleChanger.setPosition(position); //angles ramp up
-        else if (opMode_iterative.gamepad2.right_stick_y > 0)
-            angleChanger.setPosition(position);
+            rampAngleTeleOP += rampAngleIncrement;
         if (opMode_iterative.gamepad1.a)
-            angleChanger.setPosition(position); //angles ramp down
-        else if (opMode_iterative.gamepad2.right_stick_y < 0)
-            angleChanger.setPosition(position);
+            rampAngleTeleOP -= rampAngleIncrement;
+        else if (opMode_iterative.gamepad2.right_stick_y != 0)
+            rampAngleTeleOP += opMode_iterative.gamepad2.right_stick_y * rampAngleMultiplier;
+        angleChanger.setPosition(rampAngleTeleOP);
     }
 
 }

@@ -20,6 +20,7 @@ public class IntakeTest extends OpMode
     private double increment = 0.1;
     private boolean changeB = false;
     private boolean changeX = false;
+    private boolean changeY = false;
     //private Intake intake;//do i need this if i already have NopeRope
     private Intake in;
 
@@ -30,7 +31,7 @@ public class IntakeTest extends OpMode
     public void init() {
 
 
-        robot = new NopeRope(this);
+        robot = new NopeRope();
         //intake = new Intake(this, null);
         in = new Intake(this, null);
 
@@ -64,14 +65,20 @@ public class IntakeTest extends OpMode
         else {
             in.setPower(0);
         }
-        if (gamepad1.b && !changeB){
+        if (gamepad1.b && !changeB && power != 1){
             power += 0.05;
         }
-        if (gamepad1.x && !changeX){
-            power += 0.05;
+        if (gamepad1.x && !changeX && power != -1){
+            power -= 0.05;
+        }
+        if (gamepad1.y && !changeY){
+            power *= -1;
         }
         changeB = gamepad1.b;
         changeX = gamepad1.x;
+        changeY = gamepad1.y;
+        telemetry.addData("Power", power);
+        telemetry.update();
     }
 
 

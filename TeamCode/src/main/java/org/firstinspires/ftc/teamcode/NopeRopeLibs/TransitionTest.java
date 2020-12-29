@@ -24,7 +24,7 @@ import com.qualcomm.robotcore.util.Range;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="TeleOp", group="Iterative Opmode")
+@TeleOp(name=" TransitionTest", group="Iterative Opmode")
 
 public class TransitionTest extends OpMode
 {
@@ -41,7 +41,7 @@ public class TransitionTest extends OpMode
         telemetry.addData("Status", "Initialized");
 
         shooter = new Shooter (this);
-        robot = new NopeRope(this);
+        robot = new NopeRope();
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
