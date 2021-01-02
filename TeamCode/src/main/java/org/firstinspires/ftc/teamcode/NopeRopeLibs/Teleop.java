@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.Drivetrain;
+import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.TrackingWheelLocalizer;
 
 import java.util.HashMap;
 
@@ -39,9 +40,9 @@ public class Teleop extends OpMode
     @Override
     public void init() {
         telemetry.addData("Status", "Initialized");
-        robot = new NopeRope();
+
         try {
-            dt = new Drivetrain(this, new HashMap<>());
+            robot = new NopeRope(this);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -72,7 +73,8 @@ public class Teleop extends OpMode
      */
     @Override
     public void loop() {
-        dt.moveTelop(-gamepad1.left_stick_x, gamepad1.right_stick_x, -gamepad1.left_stick_y);
+        robot.teleOpControls();
+        //dt.moveTelop(-gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
     }
 
     /*

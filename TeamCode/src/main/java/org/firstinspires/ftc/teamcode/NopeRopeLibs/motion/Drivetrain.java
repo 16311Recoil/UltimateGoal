@@ -127,6 +127,7 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
 
 
         fr.setDirection(DcMotor.Direction.REVERSE);
+        bl.setDirection(DcMotorSimple.Direction.REVERSE);
         motors = Arrays.asList(fl, bl, br, fr);
 
         for (DcMotorEx motor : motors) {
@@ -294,6 +295,12 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
         br.setPower(Range.clip(y + x + z, -1, 1));
     }
 
+    public double lowSpeedAccuracyFunction(double x){
+        return 1.442 * x - 0.721 * Math.pow(x, 2) + 0.480667 * Math.pow(x, 3) - 0.3605 * Math.pow(x, 4) - 0.244033 * Math.pow(x, 6);
+    }
+
+
+
 
     //Have to make sure to add these controls in the gamepad class
     public void toggleSpeed() {
@@ -310,6 +317,8 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
         //changeDpadUp = opMode_iterative.gamepad1.dpad_up;
         opMode_iterative.telemetry.update();
     }
+
+
    // ======================================= RR METHODS TO IMPLEMENT =================================
     /*
     the following methods have been implemented from ACME RoadRunner
