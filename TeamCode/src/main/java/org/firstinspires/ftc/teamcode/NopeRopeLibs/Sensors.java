@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.NopeRopeLibs;
 
 import android.graphics.Path;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -17,17 +18,21 @@ import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.TrackingWheelLocalizer;
 import org.firstinspires.ftc.teamcode.util.Encoder;
+import org.firstinspires.ftc.teamcode.util.LynxModuleUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Sensors {
 
+    private BNO055IMU imu;
     // Encoders used for odometry
-    private Encoder front, left, right, rotation;
+    private TrackingWheelLocalizer localizer;
     private List<LynxModule> allHubs;
     private OpMode opmode;
+    private LinearOpMode opMode;
 
 
     private static int count = 0;
@@ -41,40 +46,24 @@ public class Sensors {
     private DistanceSensor transitionValidation;
     private DistanceSensor shooterValidation;
 
-    public Encoder[] encoders;
+    public List<Encoder> encoders;
 
     public double[] positionVals;
     public double[] velocityVals;
 
-    private enum EncoderIndexes{
-        FRONT(0),
-        LEFT(1),
-        RIGHT(2),
-        ROTATION(3);
-
-        private int index;
-
-        EncoderIndexes(int index){
-            this.index = index;
-        }
-
-        public int getIndex() {
-            return index;
-        }
-    }
-
-
-    private boolean autoBulkRead = false;
+    private boolean autoBulkRead = true;
 
     private static final String vuforiaKey = "";
     public static VuforiaLocalizer vuforia;
     private static final double SHOOTER_DIAMETER = 1.0;
     private static final double TRANSITION_LENGTH = 1.0;
 
-    public Sensors(OpMode opMode, boolean LinearOpMode){
+
+    public Sensors(OpMode opMode){
 
         this.opmode = opMode;
         // Gets all REV Hubs
+        LynxModuleUtil.ensureMinimumFirmwareVersion(opMode.hardwareMap);
         allHubs = opMode.hardwareMap.getAll(LynxModule.class);
 
         transitionValidation = opMode.hardwareMap.get(DistanceSensor.class, "transitionDS");
@@ -83,23 +72,22 @@ public class Sensors {
         transition = (Rev2mDistanceSensor) transitionValidation;
         shooter = (Rev2mDistanceSensor) shooterValidation;
 
+        imu = opMode.hardwareMap.get(BNO055IMU.class, "imu");
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
+        imu.initialize(parameters);
+
         // Hardware Maps All of the Encoders
-        front = new Encoder(opMode.hardwareMap.get(DcMotorEx.class, "front"));
-        left = new Encoder(opMode.hardwareMap.get(DcMotorEx.class, "left"));
-        right = new Encoder(opMode.hardwareMap.get(DcMotorEx.class, "right"));
-        rotation = new Encoder(opMode.hardwareMap.get(DcMotorEx.class, "rotation"));
-
-
-        encoders = new Encoder[]{front, left, right, rotation};
-        positionVals = new double[4];
-        velocityVals = new double[4];
-
+       localizer = new TrackingWheelLocalizer(opMode.hardwareMap);
+       setEncoders((List<Encoder>) localizer.getEncoders());
+        //rotation = new Encoder(opMode.hardwareMap.get(DcMotorEx.class, "rotation"));
         //Set br to auto for now.
         for (LynxModule module : allHubs) {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
 
         // Vuforia Initialization
+        /*
         int cameraMonitorViewId = opMode.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", opMode.hardwareMap.appContext.getPackageName());
 
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
@@ -109,9 +97,47 @@ public class Sensors {
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
         Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
         vuforia.setFrameQueueCapacity(4); // change?
+
+         */
     }
 
+    public Sensors(LinearOpMode opMode){
 
+        this.opmode = opMode;
+        // Gets all REV Hubs
+        LynxModuleUtil.ensureMinimumFirmwareVersion(opMode.hardwareMap);
+        allHubs = opMode.hardwareMap.getAll(LynxModule.class);
+
+        transitionValidation = opMode.hardwareMap.get(DistanceSensor.class, "transitionDS");
+        shooterValidation = opMode.hardwareMap.get(DistanceSensor.class, "shooterDS");
+
+        transition = (Rev2mDistanceSensor) transitionValidation;
+        shooter = (Rev2mDistanceSensor) shooterValidation;
+
+        // Hardware Maps All of the Encoders
+        localizer = new TrackingWheelLocalizer(opMode.hardwareMap);
+        setEncoders((List<Encoder>) localizer.getEncoders());
+        //rotation = new Encoder(opMode.hardwareMap.get(DcMotorEx.class, "rotation"));
+        //Set br to auto for now.
+        for (LynxModule module : allHubs) {
+            module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        }
+
+        // Vuforia Initialization
+        /*
+        int cameraMonitorViewId = opMode.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", opMode.hardwareMap.appContext.getPackageName());
+
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+
+        parameters.cameraName = opMode.hardwareMap.get(WebcamName.class, "WC");
+        parameters.vuforiaLicenseKey = vuforiaKey;
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+        Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
+        vuforia.setFrameQueueCapacity(4); // change?
+
+         */
+    }
+/*
     // Bulk reads within the control loop
     public void autoBulkRead() throws AutoBulkReadNotSetException {
         if (autoBulkRead) {
@@ -132,7 +158,7 @@ public class Sensors {
         };
 
     }
-
+*/
     public void turnOnAutoBulkReads(){
         autoBulkRead = true;
         for (LynxModule module : allHubs)
@@ -161,8 +187,9 @@ public class Sensors {
     }
 
     //returns shooter angle
+    //TODO
     public double getRotationAngle(){
-        double currentVal = rotation.getCurrentPosition();
+        //double currentVal = rotation.getCurrentPosition();
 
         return 0.0;
 
@@ -170,12 +197,12 @@ public class Sensors {
     }
 
 
-    public Encoder[] getEncoders() {
+    public List<Encoder> getEncoders() {
         return encoders;
     }
 
-    public void setEncoders(Encoder[] drivetrainEncoders) {
-        this.encoders = drivetrainEncoders;
+    public void setEncoders(List<Encoder> encoders) {
+        this.encoders = encoders;
     }
 
     private void updateValues(Encoder[] encoders, double[] positionVals, double[] velocityVals){
@@ -202,6 +229,16 @@ public class Sensors {
         this.velocityVals = velocityVals;
     }
 
+    public boolean getPark(){
+        return true;
+    }
+
+    public double getRawHeading(){
+        return imu.getAngularOrientation().firstAngle;
+    }
+    public TrackingWheelLocalizer getLocalizer(){
+        return localizer;
+    }
 
     private class AutoBulkReadNotSetException extends Exception {
         AutoBulkReadNotSetException(String s){

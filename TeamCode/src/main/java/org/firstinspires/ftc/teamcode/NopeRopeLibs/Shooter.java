@@ -16,14 +16,19 @@ public class Shooter{
     private DcMotor rotationMotor; //Larger Rotation Device
     private DcMotor screwMotor; //Motor to power the screws
 
-    Servo ringPusher; //Pushes the ring into the outtake
-    Servo angleChanger; //Adjusts the angle of the ramp/shooter
-    Sensors sensors;
+    private Servo ringPusher; //Pushes the ring into the outtake
+    private Servo angleChanger; //Adjusts the angle of the ramp/shooter
+
+
+    private boolean transitionValid;
+
+
+    private boolean shooterValid;
 
     private final double SERVO_POSITION_TO_ANGLE_FACTOR = 0; //Test for later
     private final double PUSH_OUT = 0;
     private final double PUSH_IN = 0;
-    boolean push = true;
+    private boolean push = true;
 
     private double rampAngleTeleOP = 0;
 
@@ -65,7 +70,6 @@ public class Shooter{
         opMode.telemetry.addLine("Shooter Init Completed");
         opMode.telemetry.update();
 
-        sensors = new Sensors(this.opMode, true);
     }
 
     public Shooter(OpMode opMode) {
@@ -100,7 +104,6 @@ public class Shooter{
         opMode.telemetry.addLine("Shooter Init Completed");
         opMode.telemetry.update();
 
-        sensors = new Sensors(this.opMode, false);
     }
 
 
@@ -148,7 +151,7 @@ public class Shooter{
         setRotationPower(0);
     }*/
 
-     public static boolean pivotRotation (double currentAngle, double desiredAngle){
+     public boolean pivotRotation (double currentAngle, double desiredAngle){
         desiredAngle = Math.toRadians(desiredAngle);
         currentAngle = Math.toRadians(currentAngle);
 
@@ -178,18 +181,18 @@ public class Shooter{
     }
 
     public void pushRingUp(double power) {
-        while (!sensors.getShooterValid()){
+        while (!isTransitionValid()){
             screwMotor.setPower(power);
         }
         screwMotor.setPower(0);
     }
 
     public boolean discsFull() {
-        return sensors.getTransitionValid();
+        return isTransitionValid();
     }
 
     public boolean discAtTop() { //distance sensor
-        return sensors.getShooterValid();
+        return isShooterValid();
     }
 
     public void turnAndShoot(double powerShooter, double powerRotation, double powerScrews, double angle) {
@@ -212,6 +215,21 @@ public class Shooter{
             screwMotor.setPower(power);
         }
     }
+    public boolean isTransitionValid() {
+        return transitionValid;
+    }
+
+    public void setTransitionValid(boolean transitionValid) {
+        this.transitionValid = transitionValid;
+    }
+    public boolean isShooterValid() {
+        return shooterValid;
+    }
+
+    public void setShooterValid(boolean shooterValid) {
+        this.shooterValid = shooterValid;
+    }
+
 
     //=====TeleOp Methods=========//
     /*when shooting:
@@ -233,6 +251,7 @@ public class Shooter{
         if (opMode_iterative.gamepad1.y)
             //wobble grabber controls
         if (opMode_iterative.gamepad2.dpad_down)
+            return;
             //wobble grabber controls
     }
 

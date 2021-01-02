@@ -3,10 +3,16 @@ package org.firstinspires.ftc.teamcode.NopeRopeLibs;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.Drivetrain;
+
 public class NopeRope {
 
     private OpMode teleOp;
     private LinearOpMode auto;
+
+    private static final int SHOOTER = 0;
+    private static final int TRANSITION = 1;
+    private static final int INTAKE = 2;
 
     private Drivetrain drivetrain;
     private Sensors sensors;
@@ -14,16 +20,38 @@ public class NopeRope {
     private Webcam webcam;
     private Intake intake;
     private VisionTensorFlow vision1;
+    private boolean[] sensorsArray;
 
 
-    public NopeRope() {
-        //..../
+    public NopeRope(LinearOpMode opMode) throws InterruptedException { //decide which path to take here?
+        auto = opMode;
+        sensors = new Sensors(auto);
+        drivetrain = new Drivetrain(auto, sensors.getLocalizer());
+        shooter = new Shooter(auto);
+        vision1 = new VisionTensorFlow();
+        sensorsArray = new boolean[2];
+        sensorsArray[0] = sensors.getShooterValid();
+        sensorsArray[1] = sensors.getTransitionValid();
+
+        // Webcam in sensors?
     }
 
-    public NopeRope(LinearOpMode opMode) { //decide which path to take here?
+    public NopeRope(OpMode opMode) throws InterruptedException {
+        teleOp = opMode;
+        sensors = new Sensors(teleOp);
+        drivetrain = new Drivetrain(teleOp, sensors.getLocalizer());
+        shooter = new Shooter(teleOp);
+        intake = new Intake(teleOp);
+        sensorsArray = new boolean[2];
+        sensorsArray[0] = sensors.getShooterValid();
+        sensorsArray[1] = sensors.getTransitionValid();
+
+        //updateDrivetrainAngle();
+
     }
 
-    public NopeRope(OpMode opMode) {
+    public void updateDrivetrainAngle(){
+        drivetrain.setExternalHeading(sensors.getRawHeading());
     }
 
 
@@ -31,7 +59,7 @@ public class NopeRope {
 
         // driver 1 controls the drivetrain
         drivetrain.moveTelop(-teleOp.gamepad1.left_stick_x, teleOp.gamepad1.right_stick_x, -teleOp.gamepad1.left_stick_x);
-        intake.intakeControls(0);
+        intake.intakeControls(0); // test power
         shooter.fullControls(0,0,0,0,0,0);
         // for shooter <- who controls the shooter? with what methods?
         //shooter.moveTeleop(null,null,null,null); //parameters?
@@ -66,7 +94,7 @@ public class NopeRope {
         //distance = (-48,0)
         drivetrain.moveForward(distance, power, timeout); //then drop wobble goal
         //strafe right to (-12,0)
-        shooter.turnAndShoot();
+        //shooter.turnAndShoot();
         //move back to (-12,-48), then strafe right to (-24,-48)
         pickUpWobbleGoal();
         //strafe right to (-48,-48), then move forward to (-48,0)
@@ -79,7 +107,7 @@ public class NopeRope {
         drivetrain.moveForward(distance, power, timeout);
         dropWobbleGoal();
         //move back to (-48,0), then strafe right to (-12,0)
-        shooter.turnAndShoot();
+        //shooter.turnAndShoot(0,0,0,0);
         //move back to (-12,-48), then strafe right to (-24,-48)
         pickUpWobbleGoal();
         //strafe right to (-48,-48), then move forward to (-48,24)
@@ -94,7 +122,7 @@ public class NopeRope {
         drivetrain.moveForward(distance, power, timeout);
         dropWobbleGoal();
         //move back to (-48,0), then strafe right to (-12,0)
-        shooter.turnAndShoot();
+        //shooter.turnAndShoot();
     /*
         one: wobble goal & park
             - move back to (-12,-48), then strafe right to (-24,-48), collect wobble goal
@@ -119,16 +147,46 @@ public class NopeRope {
     }
 
     public void parkRobot () {
-        while (sensors.) //to detect the launch line
+        while (!sensors.getPark()) //to detect the launch line
             drivetrain.setAllMotors(0);
     }
 
+    public void updateTransition(){
+        boolean newTransitionVal = sensors.getTransitionValid();
+
+        if (isChange(newTransitionVal, sensorsArray[TRANSITION]))
+            intake.setTransitionValid(newTransitionVal);
+
+        sensorsArray[TRANSITION] = newTransitionVal;
+
+    }
+    public void updateShooter(){
+
+        boolean newShooterVal = sensors.getShooterValid();
+        boolean newTransitionVal = sensors.getTransitionValid();
+
+
+        if (isChange(newShooterVal, sensorsArray[SHOOTER]))
+            shooter.setShooterValid(newShooterVal);
+        if (isChange(newTransitionVal, sensorsArray[TRANSITION]))
+            shooter.setTransitionValid(newTransitionVal);
+
+        sensorsArray[SHOOTER] = newShooterVal;
+        sensorsArray[TRANSITION] = newTransitionVal;
+    }
+
+    private boolean isChange(boolean a, boolean b){
+        return a ^ b;
+    }
+
+    // TODO
     public void wobblegoalControls () {
         if (teleOp.gamepad1.dpad_down)
             dropWobbleGoal();
         if (teleOp.gamepad1.dpad_up)
             pickUpWobbleGoal();
         if (teleOp.gamepad1.y)
+            return;
         //toggles wobble grabber
     }
 

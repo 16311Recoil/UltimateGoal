@@ -12,10 +12,10 @@ public class Intake {
     private OpMode teleop; // looping -> constantly running -> tell it to end
 
     private DcMotor intakeMotor;
-    Sensors sensors;
+    private boolean transitionValid;
 
     // Auto Constructor
-    public Intake(LinearOpMode opMode, Sensors sensors) {
+    public Intake(LinearOpMode opMode) {
         this.auto = opMode;
         opMode.telemetry.addLine("Intake Init Started");
         opMode.telemetry.update();
@@ -23,30 +23,29 @@ public class Intake {
         intakeMotor = this.auto.hardwareMap.dcMotor.get("intakeMotor");
 
         intakeMotor.setDirection(DcMotor.Direction.REVERSE);
+        transitionValid = false;
         //* Changing the MODE -> velocity PID
 
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-
-        this.sensors = sensors;
 
         opMode.telemetry.addLine("Intake test Init Completed");
         opMode.telemetry.update();
     }
 
     // TeleOp Constructor
-    public Intake(OpMode opMode, Sensors sensors) {
+    public Intake(OpMode opMode) {
         this.teleop = opMode;
 
         teleop.telemetry.addLine("Intake Init Started");
         teleop.telemetry.update();
 
         intakeMotor = this.teleop.hardwareMap.dcMotor.get("intakeMotor");
+        transitionValid = false;
 
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
 
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        this.sensors = sensors;
 
         opMode.telemetry.addLine("Intake test Init Completed");
         opMode.telemetry.update();
@@ -62,16 +61,22 @@ public class Intake {
     }
 
     public void intakeRing(double power) {
-        while (!sensors.getTransitionValid()) {
+        while (getTransitionValid()) {
             intakeMotor.setPower(power);
         }
         intakeMotor.setPower(0);
     }
 
-    // Debounce? How do we fix debounce?
-    // We are looking for a change from F -> T
-    // T -> F
-    // T -> F -> T
+    public void setTransitionValid(boolean valid){
+        this.transitionValid = valid;
+    }
+
+
+    public boolean getTransitionValid() {
+        return transitionValid;
+    }
+
+
     public void incrementTest(double power, double increment) {
         intakeMotor.setPower(power);
         if (teleop.gamepad1.a) {
