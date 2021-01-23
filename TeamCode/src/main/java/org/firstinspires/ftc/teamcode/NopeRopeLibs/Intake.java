@@ -39,7 +39,7 @@ public class Intake {
         teleop.telemetry.addLine("Intake Init Started");
         teleop.telemetry.update();
 
-        intakeMotor = this.teleop.hardwareMap.dcMotor.get("intakeMotor");
+        intakeMotor = teleop.hardwareMap.dcMotor.get("intakeMotor");
         transitionValid = false;
 
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
@@ -47,8 +47,8 @@ public class Intake {
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
 
-        opMode.telemetry.addLine("Intake test Init Completed");
-        opMode.telemetry.update();
+        teleop.telemetry.addLine("Intake test Init Completed");
+        teleop.telemetry.update();
     }
 
 

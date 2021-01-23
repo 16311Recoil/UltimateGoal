@@ -29,9 +29,9 @@ public class IntakeTest extends OpMode
     public void init() {
 
 
-        robot = new NopeRope();
+//        robot = new NopeRope();
         //intake = new Intake(this, null);
-        in = new Intake(this, null);
+        in = new Intake(this);
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");

@@ -44,7 +44,7 @@ public class TransitionTest extends OpMode
         telemetry.addData("Status", "Initialized");
 
         shooter = new Shooter (this);
-        robot = new NopeRope();
+        //robot = new NopeRope();
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");

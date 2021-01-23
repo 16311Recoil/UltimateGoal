@@ -17,8 +17,8 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
  * encoder localizer heading may be significantly off if the track width has not been tuned).
  */
 @Config
-@TeleOp(group = "LocText")
-public class LocalizationTest extends LinearOpMode {
+@TeleOp(group = "RecoilLocText")
+public class RecoilLocalizationTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         MecanumDrive drive = new MecanumDrive(hardwareMap);

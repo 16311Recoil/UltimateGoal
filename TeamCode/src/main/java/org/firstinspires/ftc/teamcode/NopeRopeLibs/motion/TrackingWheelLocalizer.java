@@ -46,9 +46,9 @@ public class TrackingWheelLocalizer extends ThreeTrackingWheelLocalizer {
                 new Pose2d(FORWARD_OFFSET, 0, Math.toRadians(90)) // front
         ));
 
-        leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "FL"));
-        rightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "FR"));
-        frontEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "BR"));
+        leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "shooterMotor"));
+        rightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "br"));
+        frontEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "fr"));
 
         encoders = new ArrayList<Encoder>();
         encoders.add(leftEncoder);
@@ -59,7 +59,8 @@ public class TrackingWheelLocalizer extends ThreeTrackingWheelLocalizer {
     }
 
     public static double encoderTicksToInches(double ticks) {
-        return WHEEL_RADIUS * 2 * Math.PI * GEAR_RATIO * ticks / TICKS_PER_REV;
+        //return WHEEL_RADIUS * 2 * Math.PI * GEAR_RATIO * ticks / TICKS_PER_REV;
+        return ticks;
     }
 
     @NonNull

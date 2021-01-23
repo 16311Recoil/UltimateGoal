@@ -20,6 +20,7 @@ import com.acmerobotics.roadrunner.trajectory.constraints.DriveConstraints;
 import com.acmerobotics.roadrunner.trajectory.constraints.MecanumConstraints;
 import com.acmerobotics.roadrunner.util.NanoClock;
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -96,6 +97,7 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
 
     private List<Pose2d> poseHistory;
     private Pose2d lastPoseOnTurn;
+    private List<LynxModule> allHubs;
 
 
     public Drivetrain(LinearOpMode opMode, TrackingWheelLocalizer localizer) throws InterruptedException {
@@ -167,30 +169,66 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
     public Drivetrain(OpMode opMode, TrackingWheelLocalizer localizer) throws InterruptedException {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
         this.opMode_iterative = opMode;
-
         opMode_iterative.telemetry.addLine("Drivetrain update");
         opMode_iterative.telemetry.update();
 
+        dashboard = FtcDashboard.getInstance();
+        dashboard.setTelemetryTransmissionInterval(25);
 
-        fl = this.opMode.hardwareMap.get(DcMotorEx.class,"fl");
-        fr = this.opMode.hardwareMap.get(DcMotorEx.class,"fr");
-        bl = this.opMode.hardwareMap.get(DcMotorEx.class,"bl");
-        br = this.opMode.hardwareMap.get(DcMotorEx.class,"br");
+        clock = NanoClock.system();
+
+        mode = MecanumDrive.Mode.IDLE;
+
+        turnController = new PIDFController(HEADING_PID);
+        turnController.setInputBounds(0, 2 * Math.PI);
+
+        constraints = new MecanumConstraints(BASE_CONSTRAINTS, TRACK_WIDTH);
+        follower = new HolonomicPIDVAFollower(TRANSLATIONAL_PID, TRANSLATIONAL_PID, HEADING_PID,
+                new Pose2d(0.5, 0.5, Math.toRadians(5.0)), 0.5);
+
+        poseHistory = new ArrayList<>();
+
+        fl = this.opMode_iterative.hardwareMap.get(DcMotorEx.class,"fl");
+        fr = this.opMode_iterative.hardwareMap.get(DcMotorEx.class,"fr");
+        bl = this.opMode_iterative.hardwareMap.get(DcMotorEx.class,"bl");
+        br = this.opMode_iterative.hardwareMap.get(DcMotorEx.class,"br");
 
         fr.setDirection(DcMotor.Direction.REVERSE);
-        fl.setDirection(DcMotor.Direction.REVERSE);
-        br.setDirection(DcMotor.Direction.REVERSE);
-        bl.setDirection(DcMotor.Direction.REVERSE);
+        bl.setDirection(DcMotorSimple.Direction.REVERSE);
+        motors = Arrays.asList(fl, bl, br, fr);
+
+        for (DcMotorEx motor : motors) {
+            MotorConfigurationType motorConfigurationType = motor.getMotorType().clone();
+            motorConfigurationType.setAchieveableMaxRPMFraction(1.0);
+            motor.setMotorType(motorConfigurationType);
+        }
+
+        if (RUN_USING_ENCODER) {
+            setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+
+        setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        if (RUN_USING_ENCODER && MOTOR_VELO_PID != null) {
+            setPIDCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
+        }
+
+        setLocalizer(localizer);
 
         fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        fl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        br.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         opMode_iterative.telemetry.addLine("Drivetrain Complete");
         opMode_iterative.telemetry.update();
 
-        setLocalizer(localizer);
+
     }
 
     /* ============================================== UTILITY METHODS ==============================================================*/

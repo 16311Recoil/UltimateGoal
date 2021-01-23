@@ -90,4 +90,9 @@ public class Encoder {
     public double getCorrectedVelocity() {
         return inverseOverflow(getRawVelocity(), velocityEstimate);
     }
+
+    public String toString(){
+        return "Last Position:" + lastPosition + "";
+    }
+
 }

@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.Drivetrain;
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.TrackingWheelLocalizer;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -73,7 +74,9 @@ public class Teleop extends OpMode
      */
     @Override
     public void loop() {
-        robot.teleOpControls();
+        //robot.teleOpControls();
+        telemetry.addData("Encoder Values", robot.getSensors().getWheelPos());
+        telemetry.update();
         //dt.moveTelop(-gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
     }
 

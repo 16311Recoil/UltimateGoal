@@ -40,11 +40,11 @@ public class Sensors {
     // Used for logging cycle reads.
     private ElapsedTime readTimer;
 
-    private Rev2mDistanceSensor transition;
-    private Rev2mDistanceSensor shooter;
+    //private Rev2mDistanceSensor transition;
+    //private Rev2mDistanceSensor shooter;
 
-    private DistanceSensor transitionValidation;
-    private DistanceSensor shooterValidation;
+    //private DistanceSensor transitionValidation;
+    //private DistanceSensor shooterValidation;
 
     public List<Encoder> encoders;
 
@@ -66,25 +66,26 @@ public class Sensors {
         LynxModuleUtil.ensureMinimumFirmwareVersion(opMode.hardwareMap);
         allHubs = opMode.hardwareMap.getAll(LynxModule.class);
 
-        transitionValidation = opMode.hardwareMap.get(DistanceSensor.class, "transitionDS");
-        shooterValidation = opMode.hardwareMap.get(DistanceSensor.class, "shooterDS");
+        //transitionValidation = opMode.hardwareMap.get(DistanceSensor.class, "transitionDS");
+        //shooterValidation = opMode.hardwareMap.get(DistanceSensor.class, "shooterDS");
 
-        transition = (Rev2mDistanceSensor) transitionValidation;
-        shooter = (Rev2mDistanceSensor) shooterValidation;
+        //transition = (Rev2mDistanceSensor) transitionValidation;
+        //shooter = (Rev2mDistanceSensor) shooterValidation;
 
         imu = opMode.hardwareMap.get(BNO055IMU.class, "imu");
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
         imu.initialize(parameters);
 
+        for (LynxModule module : allHubs) {
+            module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        }
+
         // Hardware Maps All of the Encoders
        localizer = new TrackingWheelLocalizer(opMode.hardwareMap);
-       setEncoders((List<Encoder>) localizer.getEncoders());
+       setEncoders(localizer.getEncoders());
         //rotation = new Encoder(opMode.hardwareMap.get(DcMotorEx.class, "rotation"));
         //Set br to auto for now.
-        for (LynxModule module : allHubs) {
-            module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-        }
 
         // Vuforia Initialization
         /*
@@ -108,11 +109,11 @@ public class Sensors {
         LynxModuleUtil.ensureMinimumFirmwareVersion(opMode.hardwareMap);
         allHubs = opMode.hardwareMap.getAll(LynxModule.class);
 
-        transitionValidation = opMode.hardwareMap.get(DistanceSensor.class, "transitionDS");
-        shooterValidation = opMode.hardwareMap.get(DistanceSensor.class, "shooterDS");
+        //transitionValidation = opMode.hardwareMap.get(DistanceSensor.class, "transitionDS");
+        //shooterValidation = opMode.hardwareMap.get(DistanceSensor.class, "shooterDS");
 
-        transition = (Rev2mDistanceSensor) transitionValidation;
-        shooter = (Rev2mDistanceSensor) shooterValidation;
+        //transition = (Rev2mDistanceSensor) transitionValidation;
+        //shooter = (Rev2mDistanceSensor) shooterValidation;
 
         // Hardware Maps All of the Encoders
         localizer = new TrackingWheelLocalizer(opMode.hardwareMap);
@@ -169,7 +170,7 @@ public class Sensors {
         for (LynxModule module : allHubs)
             module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
     }
-
+/*
     public boolean getShooterValid(){
         if (shooter.getDistance(DistanceUnit.INCH) <= SHOOTER_DIAMETER)
             return true;
@@ -185,6 +186,8 @@ public class Sensors {
         else
             return false;
     }
+
+ */
 
     //returns shooter angle
     //TODO
@@ -238,6 +241,9 @@ public class Sensors {
     }
     public TrackingWheelLocalizer getLocalizer(){
         return localizer;
+    }
+    public List<Double> getWheelPos(){
+        return localizer.getWheelPositions();
     }
 
     private class AutoBulkReadNotSetException extends Exception {

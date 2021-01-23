@@ -46,8 +46,8 @@ public class Shooter{
 
 
         //Servos
-        ringPusher = this.opMode.hardwareMap.servo.get("ringPusher");
-        angleChanger = this.opMode.hardwareMap.servo.get("angleChanger");
+        //ringPusher = this.opMode.hardwareMap.servo.get("ringPusher");
+        //angleChanger = this.opMode.hardwareMap.servo.get("angleChanger");
 
 
 
@@ -56,8 +56,8 @@ public class Shooter{
         screwMotor.setDirection(DcMotor.Direction.FORWARD);
 
 
-        ringPusher.setDirection(Servo.Direction.FORWARD);
-        angleChanger.setDirection(Servo.Direction.FORWARD);
+//        ringPusher.setDirection(Servo.Direction.FORWARD);
+       // angleChanger.setDirection(Servo.Direction.FORWARD);
 
         rotationMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooterMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -78,14 +78,14 @@ public class Shooter{
         opMode_iterative.telemetry.update();
 
         //Motors
-        shooterMotor = this.opMode.hardwareMap.dcMotor.get("shooterMotor");
-        rotationMotor = this.opMode.hardwareMap.dcMotor.get("rotationMotor");
-        screwMotor = this.opMode.hardwareMap.dcMotor.get("screwMotor");
+        shooterMotor = this.opMode_iterative.hardwareMap.dcMotor.get("shooterMotor");
+        rotationMotor = this.opMode_iterative.hardwareMap.dcMotor.get("rotationMotor");
+        screwMotor = this.opMode_iterative.hardwareMap.dcMotor.get("screwMotor");
 
 
         //Servos
-        ringPusher = this.opMode.hardwareMap.servo.get("ringPusher");
-        angleChanger = this.opMode.hardwareMap.servo.get("angleChanger");
+        //ringPusher = this.opMode.hardwareMap.servo.get("ringPusher");
+        //angleChanger = this.opMode.hardwareMap.servo.get("angleChanger");
 
 
 
@@ -93,16 +93,16 @@ public class Shooter{
         shooterMotor.setDirection(DcMotor.Direction.FORWARD);
         screwMotor.setDirection(DcMotor.Direction.FORWARD);
 
-        ringPusher.setDirection(Servo.Direction.FORWARD);
-        angleChanger.setDirection(Servo.Direction.FORWARD);
+        //ringPusher.setDirection(Servo.Direction.FORWARD);
+        //angleChanger.setDirection(Servo.Direction.FORWARD);
 
         rotationMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooterMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         screwMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
-        opMode.telemetry.addLine("Shooter Init Completed");
-        opMode.telemetry.update();
+        opMode_iterative.telemetry.addLine("Shooter Init Completed");
+        opMode_iterative.telemetry.update();
 
     }
 
@@ -239,10 +239,10 @@ public class Shooter{
     4) pushed into and out the shooter
      */
     public void fullControls(double screwPower, double shooterPower, double rotationPower, double rotationMultiplier, double rampAngleIncrement, double rampAngleMultiplier){
-        pusherAndGrabberControls();
+        //pusherAndGrabberControls();
         screwsControls(screwPower);
         shooterControls(shooterPower, rotationPower, rotationMultiplier);
-        rampControls(rampAngleIncrement, rampAngleMultiplier);
+        //rampControls(rampAngleIncrement, rampAngleMultiplier);
     }
 
     public void pusherAndGrabberControls(){

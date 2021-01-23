@@ -14,9 +14,9 @@ public class NopeRope {
     private static final int TRANSITION = 1;
     private static final int INTAKE = 2;
 
-    private Drivetrain drivetrain;
-    private Sensors sensors;
-    private Shooter shooter;
+    private final Drivetrain drivetrain;
+    private final Sensors sensors;
+    private final Shooter shooter;
     private Webcam webcam;
     private Intake intake;
     private VisionTensorFlow vision1;
@@ -30,8 +30,8 @@ public class NopeRope {
         shooter = new Shooter(auto);
         vision1 = new VisionTensorFlow();
         sensorsArray = new boolean[2];
-        sensorsArray[0] = sensors.getShooterValid();
-        sensorsArray[1] = sensors.getTransitionValid();
+       // sensorsArray[0] = sensors.getShooterValid();
+       // sensorsArray[1] = sensors.getTransitionValid();
 
         // Webcam in sensors?
     }
@@ -43,8 +43,8 @@ public class NopeRope {
         shooter = new Shooter(teleOp);
         intake = new Intake(teleOp);
         sensorsArray = new boolean[2];
-        sensorsArray[0] = sensors.getShooterValid();
-        sensorsArray[1] = sensors.getTransitionValid();
+//        sensorsArray[0] = sensors.getShooterValid();
+ //       sensorsArray[1] = sensors.getTransitionValid();
 
         //updateDrivetrainAngle();
 
@@ -151,6 +151,7 @@ public class NopeRope {
             drivetrain.setAllMotors(0);
     }
 
+    /*
     public void updateTransition(){
         boolean newTransitionVal = sensors.getTransitionValid();
 
@@ -174,7 +175,7 @@ public class NopeRope {
         sensorsArray[SHOOTER] = newShooterVal;
         sensorsArray[TRANSITION] = newTransitionVal;
     }
-
+*/
     private boolean isChange(boolean a, boolean b){
         return a ^ b;
     }
@@ -188,6 +189,9 @@ public class NopeRope {
         if (teleOp.gamepad1.y)
             return;
         //toggles wobble grabber
+    }
+    public Sensors getSensors() {
+        return sensors;
     }
 
 }
