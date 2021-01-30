@@ -23,6 +23,7 @@ public class NopeRope {
     private boolean[] sensorsArray;
 
 
+
     public NopeRope(LinearOpMode opMode) throws InterruptedException { //decide which path to take here?
         auto = opMode;
         sensors = new Sensors(auto);
@@ -56,11 +57,10 @@ public class NopeRope {
 
 
     public void teleOpControls() {
-
         // driver 1 controls the drivetrain
-        drivetrain.moveTelop(-teleOp.gamepad1.left_stick_x, teleOp.gamepad1.left_stick_y, teleOp.gamepad1.right_stick_x);
-        intake.intakeControls(0.5); // test power
-        shooter.fullControls(0.5,0.5,0,0,0,0);
+        drivetrain.moveTelop(-teleOp.gamepad1.left_stick_x * (100/127),teleOp.gamepad1.left_stick_y * (100/127), teleOp.gamepad1.right_stick_x);
+        intake.intakeControls(0.8); // test power
+        shooter.fullControls(1,0,0,0,0);
         // for shooter <- who controls the shooter? with what methods?
         //shooter.moveTeleop(null,null,null,null); //parameters?
         // don't worry about TeleOp vision right now.
@@ -193,5 +193,15 @@ public class NopeRope {
     public Sensors getSensors() {
         return sensors;
     }
+    public Drivetrain getDrivetrain(){
+        return drivetrain;
+    }
+    public Shooter getShooter(){
+        return shooter;
+    }
+    public Intake getIntake(){
+        return intake;
+    }
+
 
 }

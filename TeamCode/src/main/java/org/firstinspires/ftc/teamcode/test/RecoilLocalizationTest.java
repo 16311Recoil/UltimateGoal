@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.teamcode.NopeRopeLibs.Sensors;
+import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.Drivetrain;
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.MecanumDrive;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
@@ -21,7 +23,8 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 public class RecoilLocalizationTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        MecanumDrive drive = new MecanumDrive(hardwareMap);
+        Sensors sensors = new Sensors(this);
+        Drivetrain drive = new Drivetrain(this, sensors.getLocalizer());
 
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 

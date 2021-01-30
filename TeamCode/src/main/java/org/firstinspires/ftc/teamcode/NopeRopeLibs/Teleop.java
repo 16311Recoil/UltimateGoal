@@ -33,14 +33,14 @@ public class Teleop extends OpMode
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private NopeRope robot;
-    private Drivetrain dt;
+    private double power = 0.75;
 
     /*
      * Code to run ONCE when the driver hits INIT
      */
     @Override
     public void init() {
-        telemetry.addData("Status", "Initialized");
+
 
         try {
             robot = new NopeRope(this);
@@ -49,6 +49,7 @@ public class Teleop extends OpMode
         }
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
+        telemetry.update();
 
     }
 
@@ -66,6 +67,7 @@ public class Teleop extends OpMode
     @Override
     public void start() {
         runtime.reset();
+        robot.getShooter().setOut();
 
     }
 
@@ -73,9 +75,8 @@ public class Teleop extends OpMode
      * Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
      */
     @Override
-    public void loop() {
-        //robot.teleOpControls();
-        telemetry.addData("Encoder Values", robot.getSensors().getWheelPos());
+    public void loop(){
+        robot.teleOpControls();
         telemetry.update();
         //dt.moveTelop(-gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
     }

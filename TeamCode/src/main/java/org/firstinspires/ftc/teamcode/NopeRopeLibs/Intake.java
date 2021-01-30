@@ -23,10 +23,12 @@ public class Intake {
         intakeMotor = this.auto.hardwareMap.dcMotor.get("intakeMotor");
 
         intakeMotor.setDirection(DcMotor.Direction.REVERSE);
+        intakeMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         transitionValid = false;
         //* Changing the MODE -> velocity PID
 
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
 
         opMode.telemetry.addLine("Intake test Init Completed");
         opMode.telemetry.update();
@@ -42,7 +44,7 @@ public class Intake {
         intakeMotor = teleop.hardwareMap.dcMotor.get("intakeMotor");
         transitionValid = false;
 
-        intakeMotor.setDirection(DcMotor.Direction.FORWARD);
+        intakeMotor.setDirection(DcMotor.Direction.REVERSE);
 
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
@@ -103,14 +105,17 @@ public class Intake {
      */
 
     public void intakeControls(double power){
-        if (teleop.gamepad1.right_trigger > 0)
+        if (teleop.gamepad1.right_trigger > 0.01)
             intakeMotor.setPower(power);
-        else if (teleop.gamepad2.right_trigger > 0)
+        else if (teleop.gamepad2.right_trigger > 0.01)
             intakeMotor.setPower(power);
-        if (teleop.gamepad1.left_trigger > 0)
+        if (teleop.gamepad1.left_trigger > 0.01)
             intakeMotor.setPower(-power);
-        else if (teleop.gamepad2.left_trigger > 0)
+        else if (teleop.gamepad2.left_trigger > 0.01)
             intakeMotor.setPower(-power);
+        else if (teleop.gamepad1.right_trigger == 0)
+           turnOff();
+        teleop.telemetry.addData("Intake Power,", power);
     }
 
 }

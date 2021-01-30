@@ -33,6 +33,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.internal.android.dx.ssa.EscapeAnalysis;
 import org.firstinspires.ftc.teamcode.util.DashboardUtil;
+import org.firstinspires.ftc.teamcode.util.LynxModuleUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -148,6 +149,12 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
             setPIDCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
         }
 
+        LynxModuleUtil.ensureMinimumFirmwareVersion(opMode.hardwareMap);
+
+        for (LynxModule module : opMode.hardwareMap.getAll(LynxModule.class)) {
+            module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        }
+
 
         // for instance, setLocalizer(new ThreeTrackingWheelLocalizer(...));
         setLocalizer(localizer);
@@ -211,6 +218,12 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
 
         if (RUN_USING_ENCODER && MOTOR_VELO_PID != null) {
             setPIDCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
+        }
+
+        LynxModuleUtil.ensureMinimumFirmwareVersion(opMode_iterative.hardwareMap);
+
+        for (LynxModule module : opMode_iterative.hardwareMap.getAll(LynxModule.class)) {
+            module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
 
         setLocalizer(localizer);
