@@ -109,12 +109,12 @@ public class Intake {
             intakeMotor.setPower(power);
         else if (teleop.gamepad2.right_trigger > 0.01)
             intakeMotor.setPower(power);
-        if (teleop.gamepad1.left_trigger > 0.01)
+        else if (teleop.gamepad1.left_trigger > 0.01)
             intakeMotor.setPower(-power);
         else if (teleop.gamepad2.left_trigger > 0.01)
             intakeMotor.setPower(-power);
-        else if (teleop.gamepad1.right_trigger == 0)
-           turnOff();
+        else
+            turnOff();
         teleop.telemetry.addData("Intake Power,", power);
     }
 

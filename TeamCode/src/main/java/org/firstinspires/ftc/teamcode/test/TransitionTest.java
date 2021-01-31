@@ -72,7 +72,7 @@ public class TransitionTest extends OpMode
     @Override
     public void loop() {
 
-        shooter.fullControls(0.5,0,0,0,0);
+        shooter.fullControls(0.5,0,0,1,0,0);
         telemetry.addData("Screw Encoder Position", shooter.getScrewMotor().getCurrentPosition());
     }
 

@@ -26,8 +26,8 @@ public class Shooter{
     private boolean shooterValid;
 
     private final double SERVO_POSITION_TO_ANGLE_FACTOR = 0; //Test for later
-    private final double PUSH_OUT = 0;
-    private final double PUSH_IN = 0.25;
+    private final double PUSH_OUT = 0.74;
+    private final double PUSH_IN = 0.48;
     private boolean push = true;
 
     private double rampAngleTeleOP = 0;
@@ -97,7 +97,7 @@ public class Shooter{
 
 
         rotationMotor.setDirection(DcMotor.Direction.FORWARD);
-        shooterMotor.setDirection(DcMotor.Direction.REVERSE);
+        shooterMotor.setDirection(DcMotor.Direction.FORWARD);
         screwMotor.setDirection(DcMotor.Direction.FORWARD);
 
         //ringPusher.setDirection(Servo.Direction.FORWARD);
@@ -246,21 +246,21 @@ public class Shooter{
     3) reaches the top
     4) pushed into and out the shooter
      */
-    public void fullControls(double shooterPower, double rotationPower, double rotationMultiplier, double rampAngleIncrement, double rampAngleMultiplier){
+    public void fullControls(double shooterPower, double rotationPower, double rotationMultiplier, double screwPower,double rampAngleIncrement, double rampAngleMultiplier){
         pusherAndGrabberControls();
-        screwsControls();
+        screwsControls(screwPower);
         shooterControls(shooterPower, rotationPower, rotationMultiplier);
         //rampControls(rampAngleIncrement, rampAngleMultiplier);
     }
 
-    public void pusherAndGrabberControls(){
-        servoPosition = ringPusher.getPosition();
-        if (opMode_iterative.gamepad2.b /*&& changeB2*/ && withinPercent(servoPosition, PUSH_IN, 0.10))
-            togglePusher(true);
+    //public void pusherAndGrabberControls(){
+      //  servoPosition = ringPusher.getPosition();
+       // if (opMode_iterative.gamepad2.b /*&& changeB2*/ && withinPercent(servoPosition, PUSH_IN, 0.10))
+          //  togglePusher(true);
 
-        else if (opMode_iterative.gamepad2.a /*&& changeB2*/ && withinPercent(servoPosition, PUSH_OUT, 0.10))
-            togglePusher(false);
-        changeB2 = opMode_iterative.gamepad2.b;
+        //else if (opMode_iterative.gamepad2.a /*&& changeB2*/ && withinPercent(servoPosition, PUSH_OUT, 0.10))
+            //togglePusher(false);
+        //changeB2 = opMode_iterative.gamepad2.b;
         /*
         if (opMode_iterative.gamepad1.y)
             //wobble grabber controls
@@ -269,38 +269,63 @@ public class Shooter{
             //wobble grabber controls
 
          */
+    //}
+
+    public void pusherAndGrabberControls(){
+
+        if ((opMode_iterative.gamepad1.b && !changeB) || (opMode_iterative.gamepad2.b && !changeB2)){
+            togglePusher(push);
+        }
+        changeB = opMode_iterative.gamepad1.b;
+        changeB2 = opMode_iterative.gamepad2.b;
     }
+
     public boolean withinPercent(double compare, double threshold, double percent){
         return (compare >= (1 - percent) * threshold && compare <= threshold * (1 + percent));
     }
 
-    public void screwsControls(){
-        if(opMode_iterative.gamepad1.dpad_up && !changeDpadUp && screwPower != 1 )
+    public void screwsControls(double screwPower){
+        /*if(opMode_iterative.gamepad1.dpad_up && !changeDpadUp){
             screwPower += 0.05;
-        else if (opMode_iterative.gamepad1.dpad_down && !changeDpadDown && screwPower != -1)
+            if (screwPower > 1)
+                screwPower = 1;
+        }
+
+        else if (opMode_iterative.gamepad1.dpad_down && !changeDpadDown && screwPower != -1){
             screwPower -= 0.05;
+            if (screwPower < -1)
+                screwPower = -1;
+        }*/
+
         if (opMode_iterative.gamepad2.left_bumper)
             setScrewPower(-screwPower);
-        if (opMode_iterative.gamepad2.right_bumper)
+        else if (opMode_iterative.gamepad2.right_bumper)
+            setScrewPower(screwPower);
+        else if (opMode_iterative.gamepad1.left_bumper)
+            setScrewPower(-screwPower);
+        else if (opMode_iterative.gamepad1.right_bumper)
             setScrewPower(screwPower);
         else
             setScrewPower(0);
-        opMode_iterative.telemetry.addData("Screw Power", screwPower);
+
+        //opMode_iterative.telemetry.addData("Screw Power", screwPower);
+        //changeDpadUp = opMode_iterative.gamepad1.dpad_up;
+        //changeDpadDown = opMode_iterative.gamepad1.dpad_down;
     }
 
     public void shooterControls(double shooterPower, double rotationPower, double rotationMultiplier){
-        if (opMode_iterative.gamepad1.x)
+        if (opMode_iterative.gamepad1.a)
             setShooterPower(shooterPower);
-        else if (opMode_iterative.gamepad2.x)
-            setShooterPower(shooterPower);
-        if (opMode_iterative.gamepad1.left_bumper)
-            setRotationPower(-shooterPower); //turns shooter left
-        if (opMode_iterative.gamepad1.right_bumper)
-            setRotationPower(rotationPower); //turns shooter right
-        if (opMode_iterative.gamepad2.left_stick_x != 0)
-            setRotationPower(opMode_iterative.gamepad2.left_stick_x * rotationMultiplier); //move shooter left
+        //else if (opMode_iterative.gamepad1.y)
+            //setShooterPower(0);
         else
-            setShooterPower(0);
+           setShooterPower(0);
+        if (opMode_iterative.gamepad1.left_bumper)
+            setRotationPower(-rotationPower); //turns shooter left
+        else if (opMode_iterative.gamepad1.right_bumper)
+            setRotationPower(rotationPower); //turns shooter right
+        else if (opMode_iterative.gamepad2.left_stick_x != 0)
+            setRotationPower(opMode_iterative.gamepad2.left_stick_x * rotationMultiplier); //move shooter left
     }
 
     public void rampControls(double rampAngleIncrement, double rampAngleMultiplier){

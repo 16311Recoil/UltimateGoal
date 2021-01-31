@@ -15,13 +15,13 @@ public class ServoTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         armRotater = hardwareMap.servo.get("ringPusher");
         //armRotater.setDirection(Servo.Direction.REVERSE);
-        armRotater.setPosition(0);
+        armRotater.setPosition(0.45);
         waitForStart();
 
         while (opModeIsActive()){
             //rFang.setPosition(0.32);
             //lFang.setPosition(0.32);
-            armRotater.setPosition(0.22);
+            armRotater.setPosition(0.70);
             //    pincher.setPosition(1);
             //telemetry.addData("Position", rFang.getPosition());
         }
