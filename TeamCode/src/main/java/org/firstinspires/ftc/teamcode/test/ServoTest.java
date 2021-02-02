@@ -10,21 +10,25 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class ServoTest extends LinearOpMode {
 
     private Servo armRotater;
+    private boolean changeDpadUp = false;
+    private boolean changeDpadDown = false;
+    private double armPos = 0.03;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        armRotater = hardwareMap.servo.get("ringPusher");
+        armRotater = hardwareMap.servo.get("wobblePivot");
+        armRotater.setDirection(Servo.Direction.FORWARD);
         //armRotater.setDirection(Servo.Direction.REVERSE);
-        armRotater.setPosition(0.45);
+        armRotater.setPosition(0.62);
+
         waitForStart();
 
-        while (opModeIsActive()){
-            //rFang.setPosition(0.32);
-            //lFang.setPosition(0.32);
-            armRotater.setPosition(0.70);
+        while (opModeIsActive()) {
+            armRotater.setPosition(0.95);
+        }
             //    pincher.setPosition(1);
             //telemetry.addData("Position", rFang.getPosition());
-        }
+
 
 
 

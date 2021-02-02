@@ -17,7 +17,8 @@ public class Shooter{
     private DcMotor screwMotor; //Motor to power the screws
 
     private Servo ringPusher; //Pushes the ring into the outtake
-    private Servo angleChanger; //Adjusts the angle of the ramp/shooter
+    private Servo wobblePivot;
+    private Servo wobbleGrabber;
 
 
     private boolean transitionValid;
@@ -26,9 +27,17 @@ public class Shooter{
     private boolean shooterValid;
 
     private final double SERVO_POSITION_TO_ANGLE_FACTOR = 0; //Test for later
-    private final double PUSH_OUT = 0.74;
-    private final double PUSH_IN = 0.48;
+    private final double PUSH_OUT = 0.64;
+    private final double PUSH_IN = 0.4;
+
+    private final double WOBBLE_OUT = 0.62;
+    private final double WOBBLE_IN = 0.95;
+    private final double WOBBLE_CAPTURE = 0.6;
+    private final double WOBBLE_RELEASE = 0.95;
+
     private boolean push = true;
+    private boolean toggleWobbleP = true;
+    private boolean toggleWobbleG = true;
 
     private double rampAngleTeleOP = 0;
     private boolean changeDpadUp = false;
@@ -37,7 +46,13 @@ public class Shooter{
     private boolean changeB2 = false;
     private boolean toggleRingPusher = false;
     private boolean changeB = false;
+    private boolean changeX = false;
+    private boolean changeX2 = false;
+    private boolean changeY = false;
+    private boolean changeY2 = false;
     private double servoPosition;
+    private static final double revolution = 753.2;
+    ElapsedTime pushTimer = new ElapsedTime();
 
 
     public Shooter(LinearOpMode opMode) {
@@ -53,6 +68,11 @@ public class Shooter{
 
         //Servos
         ringPusher = this.opMode.hardwareMap.servo.get("ringPusher");
+        wobblePivot = this.opMode.hardwareMap.servo.get("wobblePivot");
+        wobbleGrabber = this.opMode.hardwareMap.servo.get("wobbleGrabber");
+        wobblePivot.setDirection(Servo.Direction.FORWARD);
+
+
         //angleChanger = this.opMode.hardwareMap.servo.get("angleChanger");
 
 
@@ -60,6 +80,7 @@ public class Shooter{
         rotationMotor.setDirection(DcMotor.Direction.FORWARD);
         shooterMotor.setDirection(DcMotor.Direction.FORWARD);
         screwMotor.setDirection(DcMotor.Direction.FORWARD);
+
         servoPosition = ringPusher.getPosition();
 
 
@@ -90,8 +111,12 @@ public class Shooter{
         screwMotor = this.opMode_iterative.hardwareMap.dcMotor.get("screwMotor");
 
 
+
         //Servos
         ringPusher = this.opMode_iterative.hardwareMap.servo.get("ringPusher");
+        wobblePivot = this.opMode_iterative.hardwareMap.servo.get("wobblePivot");
+        wobbleGrabber = this.opMode_iterative.hardwareMap.servo.get("wobbleGrabber");
+        wobblePivot.setDirection(Servo.Direction.FORWARD);
         //angleChanger = this.opMode.hardwareMap.servo.get("angleChanger");
 
 
@@ -103,6 +128,8 @@ public class Shooter{
         //ringPusher.setDirection(Servo.Direction.FORWARD);
         //angleChanger.setDirection(Servo.Direction.FORWARD);
         //screwMotor.setTargetPosition();
+
+        ringPusher.setPosition(PUSH_IN);
 
         rotationMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooterMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -173,11 +200,11 @@ public class Shooter{
        return ((currentAngle-desiredAngle) > (desiredAngle-currentAngle));
     }
 
-
+/*
     public void setShooterAngle(double angle){
         angleChanger.setPosition(angle * SERVO_POSITION_TO_ANGLE_FACTOR);
     }
-
+*/
     public void togglePusher(boolean out){
         if (out){
             ringPusher.setPosition(PUSH_OUT);
@@ -186,6 +213,26 @@ public class Shooter{
             ringPusher.setPosition(PUSH_IN);
         }
         push = !push;
+    }
+
+    public void toggleWobblePivot(boolean out){
+        if (out){
+            wobblePivot.setPosition(WOBBLE_OUT);
+        }
+        else {
+            wobblePivot.setPosition(WOBBLE_IN);
+        }
+        toggleWobbleP = !toggleWobbleP;
+    }
+
+    public void toggleWobbleGrabber(boolean out){
+        if (out){
+            wobbleGrabber.setPosition(WOBBLE_CAPTURE);
+        }
+        else {
+            wobbleGrabber.setPosition(WOBBLE_RELEASE);
+        }
+        toggleWobbleG = !toggleWobbleG;
     }
 
     public void pushRingUp(double power) {
@@ -275,9 +322,28 @@ public class Shooter{
 
         if ((opMode_iterative.gamepad1.b && !changeB) || (opMode_iterative.gamepad2.b && !changeB2)){
             togglePusher(push);
+            if (!push){
+                pushTimer.reset();
+            }
+        }
+        if (pushTimer.seconds() >= 1) {
+            push = false;
+            togglePusher(push);
         }
         changeB = opMode_iterative.gamepad1.b;
         changeB2 = opMode_iterative.gamepad2.b;
+
+        if ((opMode_iterative.gamepad1.x && !changeX) || (opMode_iterative.gamepad2.x && !changeX2)){
+           toggleWobbleGrabber(toggleWobbleG);
+        }
+        changeX = opMode_iterative.gamepad1.x;
+        changeX2 = opMode_iterative.gamepad2.x;
+
+        if ((opMode_iterative.gamepad1.y && !changeY) || (opMode_iterative.gamepad2.y && !changeY2)){
+            toggleWobblePivot(toggleWobbleP);
+        }
+        changeY = opMode_iterative.gamepad1.y;
+        changeY2 = opMode_iterative.gamepad2.y;
     }
 
     public boolean withinPercent(double compare, double threshold, double percent){
@@ -285,6 +351,8 @@ public class Shooter{
     }
 
     public void screwsControls(double screwPower){
+        //double currPos = screwMotor.getCurrentPosition();
+
         /*if(opMode_iterative.gamepad1.dpad_up && !changeDpadUp){
             screwPower += 0.05;
             if (screwPower > 1)
@@ -296,25 +364,36 @@ public class Shooter{
             if (screwPower < -1)
                 screwPower = -1;
         }*/
-
-        if (opMode_iterative.gamepad2.left_bumper)
+/*
+        if (opMode_iterative.gamepad2.left_bumper) {
+            if (currPos < screwMotor.getTargetPosition())
+                setScrewPower(screwPower);
+        }
+        else if (opMode_iterative.gamepad2.right_bumper) {
             setScrewPower(-screwPower);
-        else if (opMode_iterative.gamepad2.right_bumper)
+        }
+        else if (opMode_iterative.gamepad1.left_bumper) {
             setScrewPower(screwPower);
-        else if (opMode_iterative.gamepad1.left_bumper)
+        }
+        else if (opMode_iterative.gamepad1.right_bumper) {
             setScrewPower(-screwPower);
-        else if (opMode_iterative.gamepad1.right_bumper)
-            setScrewPower(screwPower);
+        }
         else
             setScrewPower(0);
+
+ */
 
         //opMode_iterative.telemetry.addData("Screw Power", screwPower);
         //changeDpadUp = opMode_iterative.gamepad1.dpad_up;
         //changeDpadDown = opMode_iterative.gamepad1.dpad_down;
     }
 
+
+
     public void shooterControls(double shooterPower, double rotationPower, double rotationMultiplier){
         if (opMode_iterative.gamepad1.a)
+            setShooterPower(shooterPower);
+        else if (opMode_iterative.gamepad2.a)
             setShooterPower(shooterPower);
         //else if (opMode_iterative.gamepad1.y)
             //setShooterPower(0);
@@ -335,7 +414,7 @@ public class Shooter{
             rampAngleTeleOP -= rampAngleIncrement;
         else if (opMode_iterative.gamepad2.right_stick_y != 0)
             rampAngleTeleOP += opMode_iterative.gamepad2.right_stick_y * rampAngleMultiplier;
-        angleChanger.setPosition(rampAngleTeleOP);
+        //angleChanger.setPosition(rampAngleTeleOP);
     }
     public DcMotor getScrewMotor() {
         return screwMotor;

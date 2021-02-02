@@ -24,59 +24,9 @@ public class DrivetrainTest extends LinearOpMode {
         waitForStart();
         timer.reset();
 
-        while (timer.milliseconds() < 2000){
+        while (timer.milliseconds() < 3000){
 
-            drivetraint.move(power, Math.toRadians(90), 0);
-
-        }
-        timer.reset();
-
-        while (timer.milliseconds() < 500){
-
-            drivetraint.setAllMotors(0);
-
-        }
-        timer.reset();
-
-        while (timer.milliseconds() < 2000){
-
-            drivetraint.move(power, Math.toRadians(180), 0);
-
-        }
-        timer.reset();
-
-        while (timer.milliseconds() < 500){
-
-            drivetraint.setAllMotors(0);
-
-        }
-        timer.reset();
-
-        while (timer.milliseconds() < 2000){
-
-            drivetraint.move(power, Math.toRadians(270), 0);
-
-        }
-        timer.reset();
-
-        while (timer.milliseconds() < 500){
-
-            drivetraint.setAllMotors(0);
-
-        }
-        timer.reset();
-
-        while (timer.milliseconds() < 2000){
-
-            drivetraint.move(power, Math.toRadians(0), 0);
-
-        }
-        timer.reset();
-
-
-        while (timer.milliseconds() < 500){
-
-            drivetraint.setAllMotors(0);
+            drivetraint.move(0, 0, 0.3);
 
         }
         timer.reset();

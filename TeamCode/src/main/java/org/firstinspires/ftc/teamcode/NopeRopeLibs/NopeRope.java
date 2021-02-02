@@ -14,6 +14,8 @@ public class NopeRope {
     private static final int TRANSITION = 1;
     private static final int INTAKE = 2;
 
+    private static double MULTIPLIER = 0.787401574803;
+
     private final Drivetrain drivetrain;
     private final Sensors sensors;
     private final Shooter shooter;
@@ -58,7 +60,7 @@ public class NopeRope {
 
     public void teleOpControls() {
         // driver 1 controls the drivetrain
-        drivetrain.moveTelop(-teleOp.gamepad1.right_stick_x ,teleOp.gamepad1.right_stick_y ,  teleOp.gamepad1.left_stick_x);
+        drivetrain.moveTelop(-teleOp.gamepad1.right_stick_x * MULTIPLIER ,teleOp.gamepad1.right_stick_y * MULTIPLIER,  teleOp.gamepad1.left_stick_x);
         intake.intakeControls(1); // test power
         shooter.fullControls(1,0,0,1,0,0);
         // for shooter <- who controls the shooter? with what methods?
