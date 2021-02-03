@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.Drivetrain;
@@ -34,8 +35,8 @@ public class Teleop extends OpMode
     private ElapsedTime runtime = new ElapsedTime();
     private NopeRope robot;
     private double power = 0.75;
-    private boolean changeRB = false;
-    private final int revolution = 750;
+    private boolean changeRB = true;
+    private final int revolution = 754;
     private int targetPos = 0;
 
     private enum TransitionState{
@@ -79,6 +80,8 @@ public class Teleop extends OpMode
     public void start() {
         runtime.reset();
         robot.getShooter().setOut();
+        robot.getShooter().getScrewMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.getShooter().getScrewMotor().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
     }
 
@@ -106,7 +109,8 @@ public class Teleop extends OpMode
         robot.teleOpControls();
        // robot.getShooter().getScrewMotor().getCurrentPosition() > 0
         telemetry.addData("Screw Pos",robot.getShooter().getScrewMotor().getCurrentPosition());
-        telemetry.addData("Screw Target", robot.getShooter().getScrewMotor().getTargetPosition());
+        telemetry.addData("Screw Target", targetPos);
+
         telemetry.update();
         //dt.moveTelop(-gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
     }

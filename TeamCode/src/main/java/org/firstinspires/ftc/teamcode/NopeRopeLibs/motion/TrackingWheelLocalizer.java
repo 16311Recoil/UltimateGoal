@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.NopeRopeLibs.motion;
 
+import android.media.midi.MidiDevice;
+
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.config.Config;
@@ -29,7 +31,7 @@ import java.util.List;
  *
  */
 @Config
-public class TrackingWheelLocalizer extends TwoTrackingWheelLocalizer {
+public class TrackingWheelLocalizer extends ThreeTrackingWheelLocalizer {
     public static double TICKS_PER_REV = 360;
     public static double WHEEL_RADIUS = 0.984252; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
@@ -41,29 +43,26 @@ public class TrackingWheelLocalizer extends TwoTrackingWheelLocalizer {
     public static double Y_MULTIPLIER = 1;
 
     private List<Encoder> encoders;
-    private Encoder parallelEncoder, perpendicularEncoder;
-
-    public static double PARALLEL_X = 0; // X is the up and down direction
-    public static double PARALLEL_Y = 0; // Y is the strafe direction
-
-    public static double PERPENDICULAR_X = 0;
-    public static double PERPENDICULAR_Y = 0;
+    private Encoder rightEncoder, leftEncoder, middleEncoder;
 
     public TrackingWheelLocalizer(HardwareMap hardwareMap) {
         super(Arrays.asList(
-                new Pose2d(PARALLEL_X, PARALLEL_Y, 0),
-                new Pose2d(PERPENDICULAR_X, PERPENDICULAR_Y, Math.toRadians(90))
+                new Pose2d(0, LATERAL_DISTANCE / 2, 0), // left
+                new Pose2d(0, -LATERAL_DISTANCE / 2, 0), // right
+                new Pose2d(FORWARD_OFFSET, 0, Math.toRadians(90)) // front
         ));
 
-        parallelEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "br"));
-        perpendicularEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "shooterMotor"));
+        rightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "br"));
+        middleEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "shooterMotor"));
+        leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "bl"));
 
 
 
 
         encoders = new ArrayList<Encoder>();
-        encoders.add(parallelEncoder);
-        encoders.add(perpendicularEncoder);
+        encoders.add(rightEncoder);
+        encoders.add(leftEncoder);
+        encoders.add(middleEncoder);
 
         // TODO: reverse any encoders using Encoder.setDirection(Encoder.Direction.REVERSE)
         //leftEncoder.setDirection(Encoder.Direction.REVERSE);
@@ -75,11 +74,13 @@ public class TrackingWheelLocalizer extends TwoTrackingWheelLocalizer {
     }
 
     @NonNull
+
     @Override
     public List<Double> getWheelPositions() {
         return Arrays.asList(
-                encoderTicksToInches(parallelEncoder.getCurrentPosition()),
-                encoderTicksToInches(perpendicularEncoder.getCurrentPosition())
+                encoderTicksToInches(rightEncoder.getCurrentPosition()),
+                encoderTicksToInches(middleEncoder.getCurrentPosition()),
+                encoderTicksToInches(leftEncoder.getCurrentPosition())
         );
     }
 
@@ -91,16 +92,12 @@ public class TrackingWheelLocalizer extends TwoTrackingWheelLocalizer {
         //  compensation method
 
         return Arrays.asList(
-                encoderTicksToInches(parallelEncoder.getRawVelocity()),
-                encoderTicksToInches(perpendicularEncoder.getRawVelocity())
+                encoderTicksToInches(rightEncoder.getRawVelocity()),
+                encoderTicksToInches(middleEncoder.getRawVelocity()),
+                encoderTicksToInches(leftEncoder.getRawVelocity())
         );
     }
     public List<Encoder> getEncoders(){
         return encoders;
-    }
-
-    @Override
-    public double getHeading() {
-        return 0;
     }
 }
