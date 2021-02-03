@@ -35,7 +35,8 @@ public class Teleop extends OpMode
     private ElapsedTime runtime = new ElapsedTime();
     private NopeRope robot;
     private double power = 0.75;
-    private boolean changeRB = true;
+    private boolean changeRB = false;
+    private boolean changeRB2 = false;
     private final int revolution = 754;
     private int targetPos = 0;
 
@@ -92,20 +93,21 @@ public class Teleop extends OpMode
     public void loop(){
         int currPos = robot.getShooter().getScrewMotor().getCurrentPosition();
 
-        if (gamepad2.right_bumper && changeRB && state == TransitionState.IDLE) {
+        if (((gamepad1.right_bumper && changeRB) || (gamepad2.right_bumper && changeRB2)) && state == TransitionState.IDLE) {
             state = TransitionState.SCREW_TO_POSITION_UP;
             targetPos += revolution;
         }
         if (state == TransitionState.SCREW_TO_POSITION_UP){
             if (currPos < targetPos)
-                robot.getShooter().getScrewMotor().setPower(0.75);
+                robot.getShooter().getScrewMotor().setPower(1);
             else{
                 robot.getShooter().getScrewMotor().setPower(0);
                 state = TransitionState.IDLE;
             }
 
         }
-        changeRB = gamepad2.right_bumper;
+        changeRB = gamepad1.right_bumper;
+        changeRB2 = gamepad2.right_bumper;
         robot.teleOpControls();
        // robot.getShooter().getScrewMotor().getCurrentPosition() > 0
         telemetry.addData("Screw Pos",robot.getShooter().getScrewMotor().getCurrentPosition());
