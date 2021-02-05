@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.NopeRopeLibs;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 
@@ -7,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.Drivetrain;
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.TrackingWheelLocalizer;
 
@@ -34,15 +37,26 @@ public class Teleop extends OpMode
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private NopeRope robot;
-    private double power = 0.75;
-    private boolean changeRB = false;
+    private double power = 0.0;
+    private boolean changeRB = true;
     private boolean changeRB2 = false;
-    private final int revolution = 754;
+    private final int revolution = 740;
     private int targetPos = 0;
+    private boolean changeLB = false;
+    private boolean changeLB2 = false;
+    private FtcDashboard dashboard;
+    private Telemetry dashboardTelem;
+    private int currPos = 0;
+    private PID screwPID;
+    private final double TIME_THRESHOLD = 550;
+    private boolean dpadRight = false;
+    private boolean changeDpadLeft = false;
+
 
     private enum TransitionState{
         IDLE,
         SCREW_TO_POSITION_UP,
+        SCREW_ACCURACY,
         SCREW_TO_POSITION_DOWN
     }
 
@@ -61,6 +75,9 @@ public class Teleop extends OpMode
         }
         // Tell the driver that initialization is complete.
         state = TransitionState.IDLE;
+        dashboard = FtcDashboard.getInstance();
+        dashboardTelem = dashboard.getTelemetry();
+        runtime.reset();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
@@ -80,7 +97,6 @@ public class Teleop extends OpMode
     @Override
     public void start() {
         runtime.reset();
-        robot.getShooter().setOut();
         robot.getShooter().getScrewMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.getShooter().getScrewMotor().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
@@ -91,30 +107,74 @@ public class Teleop extends OpMode
      */
     @Override
     public void loop(){
-        int currPos = robot.getShooter().getScrewMotor().getCurrentPosition();
 
-        if (((gamepad1.right_bumper && changeRB) || (gamepad2.right_bumper && changeRB2)) && state == TransitionState.IDLE) {
+        currPos = robot.getShooter().getScrewMotor().getCurrentPosition();
+        TelemetryPacket packet = new TelemetryPacket();
+
+
+/*
+
+        if (gamepad2.right_bumper && !changeRB2 && state == TransitionState.IDLE) {
             state = TransitionState.SCREW_TO_POSITION_UP;
+            runtime.reset();
             targetPos += revolution;
+
+        }
+
+        if (gamepad2.dpad_right && !dpadRight && state == TransitionState.IDLE ) {
+            state = TransitionState.SCREW_ACCURACY;
+        }
+
+        if(gamepad2.left_bumper && !changeLB2 && state == TransitionState.IDLE) {
+            state = TransitionState.SCREW_TO_POSITION_DOWN;
+            targetPos -= revolution;
+        }
+
+        if(state == TransitionState.SCREW_ACCURACY){
+            if (gamepad2.left_bumper){
+                robot.getShooter().getScrewMotor().setPower(-0.2);
+            }
+            else if (gamepad2.right_bumper){
+                robot.getShooter().getScrewMotor().setPower(0.2);
+            }
+            else if (gamepad2.dpad_left && !changeDpadLeft)
+                state = TransitionState.SCREW_TO_POSITION_UP;
+            else
+                robot.getShooter().setScrewPower(0);
         }
         if (state == TransitionState.SCREW_TO_POSITION_UP){
-            if (currPos < targetPos)
-                robot.getShooter().getScrewMotor().setPower(1);
+            if (currPos <= targetPos){
+                robot.getShooter().getScrewMotor().setPower(0.8);
+            }
+            else {
+                robot.getShooter().getScrewMotor().setPower(0);
+                state = TransitionState.IDLE;
+            }
+
+        }
+
+        if (state == TransitionState.SCREW_TO_POSITION_DOWN){
+            if (currPos >= targetPos)
+                robot.getShooter().getScrewMotor().setPower(-1);
             else{
                 robot.getShooter().getScrewMotor().setPower(0);
                 state = TransitionState.IDLE;
             }
 
         }
-        changeRB = gamepad1.right_bumper;
+
+ */
         changeRB2 = gamepad2.right_bumper;
+        changeLB2 = gamepad2.left_bumper;
+        dpadRight = gamepad2.dpad_right;
+        changeDpadLeft = gamepad2.dpad_left;
+        packet.put("Power", power);
+        packet.put("Screw Pos", currPos);
+        packet.put("Screw Target", targetPos);
+        packet.put("error", targetPos - currPos);
+        dashboard.sendTelemetryPacket(packet);
         robot.teleOpControls();
        // robot.getShooter().getScrewMotor().getCurrentPosition() > 0
-        telemetry.addData("Screw Pos",robot.getShooter().getScrewMotor().getCurrentPosition());
-        telemetry.addData("Screw Target", targetPos);
-
-        telemetry.update();
-        //dt.moveTelop(-gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
     }
 
     /*

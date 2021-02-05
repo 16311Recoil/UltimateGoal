@@ -36,8 +36,6 @@ public class PID {
         this.k_i = k_i;
         this.k_p = k_p;
         this.k_d = k_d;
-
-        this.target = target;
     }
 
     public void reset(){

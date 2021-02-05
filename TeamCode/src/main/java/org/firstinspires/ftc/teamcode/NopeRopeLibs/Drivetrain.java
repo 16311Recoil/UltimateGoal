@@ -162,7 +162,7 @@ public class Drivetrain {
         if (v_d > 0.95)
             v_d = 1;
         //toggleSpeed();
-        fl.setPower(Range.clip(y + x - z, -1, 1));
+        fl.setPower(Range.clip((y + x - z), -1, 1));
         fr.setPower(Range.clip(y - x + z, -1, 1));
         bl.setPower(Range.clip(y - x - z, -1, 1));
         br.setPower(Range.clip(y + x + z, -1, 1));

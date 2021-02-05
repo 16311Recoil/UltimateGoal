@@ -27,17 +27,20 @@ public class Shooter{
     private boolean shooterValid;
 
     private final double SERVO_POSITION_TO_ANGLE_FACTOR = 0; //Test for later
-    private final double PUSH_OUT = 0.64;
-    private final double PUSH_IN = 0.4;
+    private final double PUSH_OUT = 0.35;
+    private final double PUSH_IN = 0.15;
 
-    private final double WOBBLE_OUT = 0.62;
-    private final double WOBBLE_IN = 0.95;
+    private double i = 0;
+
+    private final double WOBBLE_OUT = 0.55;
+    private final double WOBBLE_IN = 1;
     private final double WOBBLE_CAPTURE = 0.6;
-    private final double WOBBLE_RELEASE = 0.95;
+    private final double WOBBLE_RELEASE = 1;
 
     private boolean push = true;
     private boolean toggleWobbleP = true;
     private boolean toggleWobbleG = true;
+
 
     private double rampAngleTeleOP = 0;
     private boolean changeDpadUp = false;
@@ -124,6 +127,7 @@ public class Shooter{
         rotationMotor.setDirection(DcMotor.Direction.FORWARD);
         shooterMotor.setDirection(DcMotor.Direction.FORWARD);
         screwMotor.setDirection(DcMotor.Direction.FORWARD);
+
 
         //ringPusher.setDirection(Servo.Direction.FORWARD);
         //angleChanger.setDirection(Servo.Direction.FORWARD);
@@ -353,45 +357,49 @@ public class Shooter{
     public void screwsControls(double screwPower){
         //double currPos = screwMotor.getCurrentPosition();
 
-        /*if(opMode_iterative.gamepad1.dpad_up && !changeDpadUp){
-            screwPower += 0.05;
+        if(opMode_iterative.gamepad1.dpad_up && !changeDpadUp){
+            screwPower += 0.1;
             if (screwPower > 1)
                 screwPower = 1;
         }
-
         else if (opMode_iterative.gamepad1.dpad_down && !changeDpadDown && screwPower != -1){
-            screwPower -= 0.05;
+            screwPower -= 0.1;
             if (screwPower < -1)
                 screwPower = -1;
-        }*/
-/*
+        }
         if (opMode_iterative.gamepad2.left_bumper) {
-            if (currPos < screwMotor.getTargetPosition())
-                setScrewPower(screwPower);
+            setScrewPower(-screwPower);
         }
         else if (opMode_iterative.gamepad2.right_bumper) {
-            setScrewPower(-screwPower);
-        }
-        else if (opMode_iterative.gamepad1.left_bumper) {
             setScrewPower(screwPower);
         }
-        else if (opMode_iterative.gamepad1.right_bumper) {
+        else if (opMode_iterative.gamepad1.left_bumper) {
             setScrewPower(-screwPower);
+        }
+        else if (opMode_iterative.gamepad1.right_bumper) {
+            setScrewPower(screwPower);
         }
         else
             setScrewPower(0);
-
- */
-
         //opMode_iterative.telemetry.addData("Screw Power", screwPower);
         //changeDpadUp = opMode_iterative.gamepad1.dpad_up;
         //changeDpadDown = opMode_iterative.gamepad1.dpad_down;
     }
 
+    private double pidController(boolean condition, double kp, double ki, double kd, double dt, double error, double lastError){
+        double p = 0 , d = 0;
+        if (condition){
+            i += 0.5 * (error + lastError) * (dt);
+            p = error;
+            d = (error - lastError) / dt;
+        }
+        return kp * p + ki * i + kd * d;
+    }
+
 
 
     public void shooterControls(double shooterPower, double rotationPower, double rotationMultiplier){
-        if (opMode_iterative.gamepad1.a)
+        if (opMode_iterative.gamepad1.right_trigger > 0.1)
             setShooterPower(shooterPower);
         else if (opMode_iterative.gamepad2.a)
             setShooterPower(shooterPower);
