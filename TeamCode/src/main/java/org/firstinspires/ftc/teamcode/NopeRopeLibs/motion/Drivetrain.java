@@ -73,8 +73,18 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
     public static double VX_WEIGHT = 1;
     public static double VY_WEIGHT = 1;
     public static double OMEGA_WEIGHT = 1;
+    private boolean changeDpadDown = false;
+    private boolean changeDpadUp = false;
+
+    private enum State {
+        FULL_SPEED,
+        REGULAR_SPEED,
+        LOW_SPEED,
+        H_SCALE_POWER;
+    }
 
     private double rawHeading;
+    private State teleOpState;
 
 
 
@@ -199,6 +209,8 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
         fr = this.opMode_iterative.hardwareMap.get(DcMotorEx.class,"fr");
         bl = this.opMode_iterative.hardwareMap.get(DcMotorEx.class,"bl");
         br = this.opMode_iterative.hardwareMap.get(DcMotorEx.class,"br");
+
+        teleOpState = State.REGULAR_SPEED;
 
         fr.setDirection(DcMotor.Direction.REVERSE);
         bl.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -339,12 +351,28 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
             v_d = 0;
         if (v_d > 0.95)
             v_d = 1;
-        //toggleSpeed();
-        fl.setPower(Range.clip(y + x - z, -1, 1));
-        fr.setPower(Range.clip(y - x + z, -1, 1));
-        bl.setPower(Range.clip(y - x - z, -1, 1));
-        br.setPower(Range.clip(y + x + z, -1, 1));
+
+        if (teleOpState.equals(State.FULL_SPEED))
+            multiplier = 1;
+        if (teleOpState.equals(State.REGULAR_SPEED))
+            multiplier = 0.5;
+        if (teleOpState.equals(State.LOW_SPEED))
+            multiplier = .25;
+        /*
+        if (teleOpState.equals(State.H_SCALE_POWER))
+            multiplier = lowSpeedAccuracyFunction(v_d);
+
+         */
+
+        toggleSpeed();
+
+        fl.setPower(multiplier * Range.clip(y + x - z, -1, 1));
+        fr.setPower(multiplier * Range.clip(y - x + z, -1, 1));
+        bl.setPower(multiplier * Range.clip(y - x - z, -1, 1));
+        br.setPower(multiplier * Range.clip(y + x + z, -1, 1));
     }
+
+
 
     public double lowSpeedAccuracyFunction(double x){
         return 1.442 * x - 0.721 * Math.pow(x, 2) + 0.480667 * Math.pow(x, 3) - 0.3605 * Math.pow(x, 4) - 0.244033 * Math.pow(x, 6);
@@ -355,18 +383,18 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
 
     //Have to make sure to add these controls in the gamepad class
     public void toggleSpeed() {
-        /*if ((opMode_iterative.gamepad1.dpad_down && !changeDpadDown) && multiCounter > 0) {
+        if ((opMode_iterative.gamepad1.dpad_down && !changeDpadDown) && multiCounter > 0) {
             multiCounter--;
         }
         else if ((opMode_iterative.gamepad1.dpad_up && !changeDpadUp) && multiCounter < 2) {
             multiCounter++;
-        }*/
+        }
         multiplier = multipliers[multiCounter];
-        opMode_iterative.telemetry.addLine(multipliersTelemetry[multiCounter]);
 
-        //changeDpadDown = opMode_iterative.gamepad1.dpad_down;
-        //changeDpadUp = opMode_iterative.gamepad1.dpad_up;
-        opMode_iterative.telemetry.update();
+
+        changeDpadDown = opMode_iterative.gamepad1.dpad_down;
+        changeDpadUp = opMode_iterative.gamepad1.dpad_up;
+
     }
 
 

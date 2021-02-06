@@ -40,7 +40,7 @@ public class Teleop extends OpMode
     private double power = 0.0;
     private boolean changeRB = true;
     private boolean changeRB2 = false;
-    private final int revolution = 740;
+    private final int revolution = 750;
     private int targetPos = 0;
     private boolean changeLB = false;
     private boolean changeLB2 = false;
@@ -112,7 +112,7 @@ public class Teleop extends OpMode
         TelemetryPacket packet = new TelemetryPacket();
 
 
-/*
+
 
         if (gamepad2.right_bumper && !changeRB2 && state == TransitionState.IDLE) {
             state = TransitionState.SCREW_TO_POSITION_UP;
@@ -163,7 +163,6 @@ public class Teleop extends OpMode
 
         }
 
- */
         changeRB2 = gamepad2.right_bumper;
         changeLB2 = gamepad2.left_bumper;
         dpadRight = gamepad2.dpad_right;

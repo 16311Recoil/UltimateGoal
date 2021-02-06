@@ -4,6 +4,7 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -126,8 +127,9 @@ public class Shooter{
 
         rotationMotor.setDirection(DcMotor.Direction.FORWARD);
         shooterMotor.setDirection(DcMotor.Direction.FORWARD);
-        screwMotor.setDirection(DcMotor.Direction.FORWARD);
 
+        shooterMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        screwMotor.setDirection(DcMotor.Direction.FORWARD);
 
         //ringPusher.setDirection(Servo.Direction.FORWARD);
         //angleChanger.setDirection(Servo.Direction.FORWARD);
@@ -357,6 +359,7 @@ public class Shooter{
     public void screwsControls(double screwPower){
         //double currPos = screwMotor.getCurrentPosition();
 
+        /*
         if(opMode_iterative.gamepad1.dpad_up && !changeDpadUp){
             screwPower += 0.1;
             if (screwPower > 1)
@@ -384,6 +387,8 @@ public class Shooter{
         //opMode_iterative.telemetry.addData("Screw Power", screwPower);
         //changeDpadUp = opMode_iterative.gamepad1.dpad_up;
         //changeDpadDown = opMode_iterative.gamepad1.dpad_down;
+
+         */
     }
 
     private double pidController(boolean condition, double kp, double ki, double kd, double dt, double error, double lastError){
