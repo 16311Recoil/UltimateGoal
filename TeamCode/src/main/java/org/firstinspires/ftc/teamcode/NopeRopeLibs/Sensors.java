@@ -4,6 +4,7 @@ package org.firstinspires.ftc.teamcode.NopeRopeLibs;
 import android.graphics.Path;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -16,9 +17,12 @@ import com.vuforia.Vuforia;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.TrackingWheelLocalizer;
+import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.TwoWheelLocalizer;
 import org.firstinspires.ftc.teamcode.util.Encoder;
 import org.firstinspires.ftc.teamcode.util.LynxModuleUtil;
 
@@ -27,9 +31,13 @@ import java.util.List;
 
 public class Sensors {
 
-    private BNO055IMU imu;
+    public BNO055IMU gyro;
+    private Orientation angles;
+    private Acceleration gravity;
+    private BNO055IMU.Parameters parameters;
+
     // Encoders used for odometry
-    private TrackingWheelLocalizer localizer;
+    private TwoWheelLocalizer localizer;
     private List<LynxModule> allHubs;
     private OpMode opmode;
     private LinearOpMode opMode;
@@ -79,7 +87,17 @@ public class Sensors {
         }
 
         // Hardware Maps All of the Encoders
-       localizer = new TrackingWheelLocalizer(opMode.hardwareMap);
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+        parameters.loggingEnabled = true;
+        parameters.loggingTag = "IMU";
+        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+
+        gyro = opMode.hardwareMap.get(BNO055IMU.class, "imu");
+        gyro.initialize(parameters);
+        localizer = new TwoWheelLocalizer(opMode.hardwareMap, this);
        //setEncoders(localizer.getEncoders());
         //rotation = new Encoder(opMode.hardwareMap.get(DcMotorEx.class, "rotation"));
         //Set br to auto for now.
@@ -117,16 +135,22 @@ public class Sensors {
         //rotation = new Encoder(opMode.hardwareMap.get(DcMotorEx.class, "rotation"));
         //Set br to auto for now.
 
-        imu = opMode.hardwareMap.get(BNO055IMU.class, "imu");
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
-        imu.initialize(parameters);
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+        parameters.loggingEnabled = true;
+        parameters.loggingTag = "IMU";
+        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+
+        gyro = opMode.hardwareMap.get(BNO055IMU.class, "imu");
+        gyro.initialize(parameters);
 
         for (LynxModule module : allHubs) {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
 
-        localizer = new TrackingWheelLocalizer(opMode.hardwareMap);
+        localizer = new TwoWheelLocalizer(opMode.hardwareMap, this);
         setEncoders((List<Encoder>) localizer.getEncoders());
 
         // Vuforia Initialization
@@ -241,15 +265,40 @@ public class Sensors {
         return true;
     }
 
-    public double getRawHeading(){
-        return imu.getAngularOrientation().firstAngle;
+    private void updateGyro()
+    {
+        angles = gyro.getAngularOrientation();
     }
-    public TrackingWheelLocalizer getLocalizer(){
+
+    // Bulk Reads Sensor Data to update all values for use.
+    public void updateSensorVals(){
+        updateGyro();
+
+    }
+    // Determine which is yaw, pitch, and roll.
+    public double getRawExternalHeading()
+    {
+        updateGyro();
+        return angles.firstAngle;
+    }
+    public double getSecondAngle()
+    {
+        updateGyro();
+        return angles.secondAngle;
+    }
+    public double getThirdAngle()
+    {
+        //sensorRange.getDistance(DistanceUnit.MM))
+        updateGyro();
+        return angles.thirdAngle;
+    }
+    public TwoWheelLocalizer getLocalizer(){
         return localizer;
     }
     public List<Double> getWheelPos(){
         return localizer.getWheelPositions();
     }
+
 
     private class AutoBulkReadNotSetException extends Exception {
         AutoBulkReadNotSetException(String s){

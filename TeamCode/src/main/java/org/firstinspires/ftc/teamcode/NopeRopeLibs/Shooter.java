@@ -28,7 +28,7 @@ public class Shooter{
     private boolean shooterValid;
 
     private final double SERVO_POSITION_TO_ANGLE_FACTOR = 0; //Test for later
-    private final double PUSH_OUT = 0.35;
+    private final double PUSH_OUT = 0.38;
     private final double PUSH_IN = 0.15;
 
     private double i = 0;
