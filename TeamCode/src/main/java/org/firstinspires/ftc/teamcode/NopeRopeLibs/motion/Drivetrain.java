@@ -37,6 +37,7 @@ import org.firstinspires.ftc.teamcode.util.DashboardUtil;
 import org.firstinspires.ftc.teamcode.util.LynxModuleUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -76,6 +77,15 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
     public static double OMEGA_WEIGHT = 1;
     private boolean changeDpadDown = false;
     private boolean changeDpadUp = false;
+
+
+    private static final int X = 0;
+    private static final int Y = 1;
+    private static final int Z = 2;
+
+    private static final int kp = 0;
+    private static final int ki = 1;
+    private static final int kd = 2;
 
     private enum State {
         FULL_SPEED,
@@ -371,14 +381,25 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
                                 Math.abs(theta_i - theta) >= 0.05 &&
                                 timer.milliseconds() <= timeout;
 
-        pidCMotionontroller[PID_X].setConstants(constants[0][0], constants[0][1], constants[0][2], x);
-        pidCMotionontroller[PID_Y].setConstants(constants[1][0], constants[1][1], constants[1][2], y);
-        pidCMotionontroller[PID_THETA].setConstants(constants[2][0], constants[2][1], constants[2][2], theta);
+        pidCMotionontroller[PID_X].setConstants(constants[X][kp], constants[X][ki], constants[X][kd], x);
+        pidCMotionontroller[PID_Y].setConstants(constants[Y][kp], constants[Y][ki], constants[Y][kd], y);
+        pidCMotionontroller[PID_THETA].setConstants(constants[Z][kp], constants[Z][ki], constants[Z][kd], theta);
 
         while (loopCondition){
+            TelemetryPacket packet = new TelemetryPacket();
+
             double p_x = pidCMotionontroller[PID_X].loop(x_i, timer.milliseconds());
             double p_y = pidCMotionontroller[PID_Y].loop(y_i, timer.milliseconds());
             double p_theta = pidCMotionontroller[PID_THETA].loop(theta_i, timer.milliseconds());
+
+            packet.put("p_x", p_x);
+            packet.put("p_y", p_y);
+            packet.put("p_theta", p_theta);
+
+            opMode.telemetry.addData("p_x", p_x);
+            opMode.telemetry.addData("p_y", p_y);
+            opMode.telemetry.addData("p_z", p_theta);
+
 
             move(p_x, p_y, p_theta);
 
@@ -390,6 +411,18 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
             double y_error = y_i - y;
             double theta_error = theta_i - theta;
 
+            packet.put("x_error", x_error);
+            packet.put("y_error", y_error);
+            packet.put("theta_error", theta_error);
+
+            opMode.telemetry.addData("x_error", x_error);
+            opMode.telemetry.addData("Y_error", y_error);
+            opMode.telemetry.addData("Z_error", theta_error);
+
+            opMode.telemetry.update();
+            dashboard.sendTelemetryPacket(packet);
+
+
             loopCondition = Math.abs(x_error) > 0.05 ||
                     Math.abs(y_error) > 0.05 ||
                     Math.abs(theta_error) > 0.05 &&
@@ -400,10 +433,6 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
 
 
     }
-
-
-
-
     //================================================================= Tele-Op Methods ===============================================================//
 
     public void moveTelop(double x, double y, double z) {
