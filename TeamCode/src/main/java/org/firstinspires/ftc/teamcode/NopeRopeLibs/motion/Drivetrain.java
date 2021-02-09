@@ -32,6 +32,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.internal.android.dx.ssa.EscapeAnalysis;
+import org.firstinspires.ftc.teamcode.NopeRopeLibs.PID;
 import org.firstinspires.ftc.teamcode.util.DashboardUtil;
 import org.firstinspires.ftc.teamcode.util.LynxModuleUtil;
 import org.jetbrains.annotations.NotNull;
@@ -85,8 +86,11 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
 
     private double rawHeading;
     private State teleOpState;
+    private PID[] pidCMotionontroller;
 
-
+    private static final int PID_X = 0;
+    private static final int PID_Y = 0;
+    private static final int PID_THETA = 0;
 
     public enum Mode {
         IDLE,
@@ -111,7 +115,7 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
     private List<LynxModule> allHubs;
 
 
-    public Drivetrain(LinearOpMode opMode, TrackingWheelLocalizer localizer) throws InterruptedException {
+    public Drivetrain(LinearOpMode opMode, TwoWheelLocalizer localizer) throws InterruptedException {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
         this.opMode = opMode;
 
@@ -174,6 +178,8 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
         bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        pidCMotionontroller = new PID[]{new PID(), new PID(), new PID()};
+
         fl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -183,7 +189,7 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
         opMode.telemetry.update();
     }
 
-    public Drivetrain(OpMode opMode, TrackingWheelLocalizer localizer) throws InterruptedException {
+    public Drivetrain(OpMode opMode, TwoWheelLocalizer localizer) throws InterruptedException {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
         this.opMode_iterative = opMode;
         opMode_iterative.telemetry.addLine("Drivetrain update");
@@ -323,6 +329,18 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
         setAllMotors(0);
     }
 
+    public void move(double x, double y, double z) {
+        /*
+        if (teleOpState.equals(State.H_SCALE_POWER))
+            multiplier = lowSpeedAccuracyFunction(v_d);
+
+         */
+        fl.setPower(multiplier * Range.clip(y + x - z, -1, 1));
+        fr.setPower(multiplier * Range.clip(y - x + z, -1, 1));
+        bl.setPower(multiplier * Range.clip(y - x - z, -1, 1));
+        br.setPower(multiplier * Range.clip(y + x + z, -1, 1));
+    }
+    /*
     public void move(double v_d, double netTheta, double z){
         fl.setPower( (v_d * (Math.sin((netTheta)))) + v_d * Math.cos(netTheta) - z);
         fr.setPower((v_d * (Math.sin((netTheta)))) - v_d * Math.cos(netTheta) + z);
@@ -330,6 +348,8 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
         br.setPower(v_d*Math.sin(netTheta) + (v_d * (Math.cos((netTheta)))) + z);
     }
 
+
+     */
     @Override
     protected double getRawExternalHeading() {
         return rawHeading;
@@ -337,6 +357,48 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
 
     public void setRawHeading(double rawHeading) {
          this.rawHeading = rawHeading;
+    }
+
+    public void moveToPositionPID(double x, double y, double theta, double timeout, double[][] constants){
+        ElapsedTime timer = new ElapsedTime();
+        Pose2d pose = getPoseEstimate();
+        double x_i = pose.getX();
+        double y_i = pose.getY();
+        double theta_i = pose.getHeading();
+
+        boolean loopCondition = Math.abs(x_i - x) >= 0.05 ||
+                                Math.abs(y_i - y) >= 0.05 ||
+                                Math.abs(theta_i - theta) >= 0.05 &&
+                                timer.milliseconds() <= timeout;
+
+        pidCMotionontroller[PID_X].setConstants(constants[0][0], constants[0][1], constants[0][2], x);
+        pidCMotionontroller[PID_Y].setConstants(constants[1][0], constants[1][1], constants[1][2], y);
+        pidCMotionontroller[PID_THETA].setConstants(constants[2][0], constants[2][1], constants[2][2], theta);
+
+        while (loopCondition){
+            double p_x = pidCMotionontroller[PID_X].loop(x_i, timer.milliseconds());
+            double p_y = pidCMotionontroller[PID_Y].loop(y_i, timer.milliseconds());
+            double p_theta = pidCMotionontroller[PID_THETA].loop(theta_i, timer.milliseconds());
+
+            move(p_x, p_y, p_theta);
+
+            x_i = pose.getX();
+            y_i = pose.getY();
+            theta_i = pose.getHeading();
+
+            double x_error = x_i - x;
+            double y_error = y_i - y;
+            double theta_error = theta_i - theta;
+
+            loopCondition = Math.abs(x_error) > 0.05 ||
+                    Math.abs(y_error) > 0.05 ||
+                    Math.abs(theta_error) > 0.05 &&
+                    timer.milliseconds() < timeout;
+
+
+        }
+
+
     }
 
 

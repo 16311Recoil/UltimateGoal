@@ -54,7 +54,7 @@ public class NopeRope {
     }
 
     public void updateDrivetrainAngle(){
-        drivetrain.setExternalHeading(sensors.getRawHeading());
+        drivetrain.setExternalHeading(sensors.getRawExternalHeading());
     }
 
 

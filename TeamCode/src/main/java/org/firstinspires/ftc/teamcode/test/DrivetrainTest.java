@@ -4,8 +4,10 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.NopeRopeLibs.Sensors;
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.Drivetrain;
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.TrackingWheelLocalizer;
+import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.TwoWheelLocalizer;
 
 
 @Autonomous(name="DriveTest", group="Linear Opmode")
@@ -18,7 +20,7 @@ public class DrivetrainTest extends LinearOpMode {
 
 
     public void runOpMode() throws InterruptedException {
-        drivetraint = new Drivetrain(this,new TrackingWheelLocalizer(this.hardwareMap));
+        drivetraint = new Drivetrain(this,new TwoWheelLocalizer(this.hardwareMap, new Sensors(this)));
         timer = new ElapsedTime();
 
         waitForStart();

@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.test;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -25,12 +27,15 @@ public class RecoilLocalizationTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         Sensors sensors = new Sensors(this);
         Drivetrain drive = new Drivetrain(this, sensors.getLocalizer());
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+
 
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         waitForStart();
 
         while (!isStopRequested()) {
+            TelemetryPacket packet = new TelemetryPacket();
             drive.setWeightedDrivePower(
                     new Pose2d(
                             -gamepad1.left_stick_y,
@@ -42,9 +47,15 @@ public class RecoilLocalizationTest extends LinearOpMode {
             drive.update();
 
             Pose2d poseEstimate = drive.getPoseEstimate();
+            packet.put("x", poseEstimate.getX());
+            packet.put("y", poseEstimate.getY());
+            packet.put("heading", poseEstimate.getHeading());
+
             telemetry.addData("x", poseEstimate.getX());
             telemetry.addData("y", poseEstimate.getY());
             telemetry.addData("heading", poseEstimate.getHeading());
+
+            dashboard.sendTelemetryPacket(packet);
             telemetry.update();
         }
     }
