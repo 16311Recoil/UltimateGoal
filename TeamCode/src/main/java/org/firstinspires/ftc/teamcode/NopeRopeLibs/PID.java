@@ -32,10 +32,12 @@ public class PID {
         this.target = target;
     }
 
-    public void setConstants (double k_i, double k_p, double k_d, double target) {
-        this.k_i = k_i;
+    public void setConstants (double k_p, double k_i, double k_d, double target) {
         this.k_p = k_p;
+        this.k_i = k_i;
         this.k_d = k_d;
+
+        this.target = target;
     }
 
     public void reset(){
@@ -99,4 +101,8 @@ public class PID {
     public double getI_sum() {
         return i_sum;
     }
+    public String toString(){
+        return "Kp" + k_p + "\n" + "Ki" + k_i + "\n" + k_d + "kd" + "\n" + "Target" + target + "\n" + "PrevError" + previousError + "\n";
+    }
+
 }

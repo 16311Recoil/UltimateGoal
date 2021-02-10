@@ -58,6 +58,7 @@ Contains methods from ACME's Roadrunner Mecanum Drive Class combined with 16311 
  */
 public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
 
+    private final PID pidZ;
     public LinearOpMode opMode;
     public OpMode opMode_iterative;
     private DcMotorEx fl, fr, bl, br;
@@ -78,6 +79,8 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
     private boolean changeDpadDown = false;
     private boolean changeDpadUp = false;
 
+    private PID pidX;
+
 
     private static final int X = 0;
     private static final int Y = 1;
@@ -86,6 +89,7 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
     private static final int kp = 0;
     private static final int ki = 1;
     private static final int kd = 2;
+    private PID pidY;
 
     private enum State {
         FULL_SPEED,
@@ -153,6 +157,9 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
         br = this.opMode.hardwareMap.get(DcMotorEx.class,"br");
 
 
+        pidX = new PID();
+        pidY = new PID();
+        pidZ = new PID();
         fr.setDirection(DcMotor.Direction.REVERSE);
         bl.setDirection(DcMotorSimple.Direction.REVERSE);
         motors = Arrays.asList(fl, bl, br, fr);
@@ -209,6 +216,8 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
         dashboard.setTelemetryTransmissionInterval(25);
 
         clock = NanoClock.system();
+
+        pidZ = new PID();
 
         mode = MecanumDrive.Mode.IDLE;
 
@@ -339,27 +348,14 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
         setAllMotors(0);
     }
 
-    public void move(double x, double y, double z) {
-        /*
-        if (teleOpState.equals(State.H_SCALE_POWER))
-            multiplier = lowSpeedAccuracyFunction(v_d);
 
-         */
-        fl.setPower(multiplier * Range.clip(y + x - z, -1, 1));
-        fr.setPower(multiplier * Range.clip(y - x + z, -1, 1));
-        bl.setPower(multiplier * Range.clip(y - x - z, -1, 1));
-        br.setPower(multiplier * Range.clip(y + x + z, -1, 1));
-    }
-    /*
+
     public void move(double v_d, double netTheta, double z){
-        fl.setPower( (v_d * (Math.sin((netTheta)))) + v_d * Math.cos(netTheta) - z);
-        fr.setPower((v_d * (Math.sin((netTheta)))) - v_d * Math.cos(netTheta) + z);
-        bl.setPower((v_d * (Math.sin((netTheta)))) - v_d * Math.cos(netTheta) - z);
-        br.setPower(v_d*Math.sin(netTheta) + (v_d * (Math.cos((netTheta)))) + z);
+        fl.setPower( (v_d * (Math.sin((netTheta + Math.PI)))) + v_d * Math.cos(netTheta + Math.PI) - z);
+        fr.setPower((v_d * (Math.sin((netTheta + Math.PI)))) - v_d * Math.cos(netTheta + Math.PI) + z);
+        bl.setPower((v_d * (Math.sin((netTheta + Math.PI)))) - v_d * Math.cos(netTheta + Math.PI) - z);
+        br.setPower(v_d*Math.sin(netTheta + Math.PI) + (v_d * (Math.cos((netTheta + Math.PI)))) + z);
     }
-
-
-     */
     @Override
     protected double getRawExternalHeading() {
         return rawHeading;
@@ -367,6 +363,10 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
 
     public void setRawHeading(double rawHeading) {
          this.rawHeading = rawHeading;
+    }
+
+    public void moveToPosition(double x, double timeout){
+
     }
 
     public void moveToPositionPID(double x, double y, double theta, double timeout, double[][] constants){
@@ -378,58 +378,72 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
 
         boolean loopCondition = Math.abs(x_i - x) >= 0.05 ||
                                 Math.abs(y_i - y) >= 0.05 ||
-                                Math.abs(theta_i - theta) >= 0.05 &&
-                                timer.milliseconds() <= timeout;
+                                Math.abs(theta_i - theta) > 0.1 ||
+                                timer.seconds() <= timeout;
 
-        pidCMotionontroller[PID_X].setConstants(constants[X][kp], constants[X][ki], constants[X][kd], x);
-        pidCMotionontroller[PID_Y].setConstants(constants[Y][kp], constants[Y][ki], constants[Y][kd], y);
-        pidCMotionontroller[PID_THETA].setConstants(constants[Z][kp], constants[Z][ki], constants[Z][kd], theta);
+        pidX.setConstants(constants[X][kp], constants[X][ki], constants[X][kd], x);
+        //pidCMotionontroller[PID_X].setConstants(constants[X][kp], constants[X][ki], constants[X][kd], x);
+        pidY.setConstants(constants[Y][kp], constants[Y][ki], constants[Y][kd], y);
+        pidZ.setConstants(constants[Z][kp], constants[Z][ki], constants[Z][kd], theta);
 
-        while (loopCondition){
+        while (loopCondition && opMode.opModeIsActive()){
+
+            if (theta > Math.PI)
+                x_i*=-1;
+
+            update();
+            Pose2d poseEstimate = getPoseEstimate();
+
+            pidX.setTarget(x);
+            pidY.setTarget(y);
+            pidZ.setTarget(theta);
+
             TelemetryPacket packet = new TelemetryPacket();
 
-            double p_x = pidCMotionontroller[PID_X].loop(x_i, timer.milliseconds());
-            double p_y = pidCMotionontroller[PID_Y].loop(y_i, timer.milliseconds());
-            double p_theta = pidCMotionontroller[PID_THETA].loop(theta_i, timer.milliseconds());
+            double p_x = pidX.loop(x_i, timer.milliseconds());
+            double p_y = pidY.loop(y_i, timer.milliseconds());
+            double p_theta = pidZ.loop(theta_i, timer.milliseconds());
 
             packet.put("p_x", p_x);
             packet.put("p_y", p_y);
             packet.put("p_theta", p_theta);
 
+             x_i = poseEstimate.getX();
+             y_i = poseEstimate.getY();
+             theta_i = poseEstimate.getHeading();
+
+            packet.put("", pidX.toString());
+            packet.put("", pidY);
+            packet.put("", pidZ);
+
+            opMode.telemetry.addData("", pidX.toString());
+
             opMode.telemetry.addData("p_x", p_x);
             opMode.telemetry.addData("p_y", p_y);
             opMode.telemetry.addData("p_z", p_theta);
 
-
-            move(p_x, p_y, p_theta);
-
-            x_i = pose.getX();
-            y_i = pose.getY();
-            theta_i = pose.getHeading();
+            double v_d = Math.sqrt(Math.pow(p_x, 2) + Math.pow(p_y, 2));
+            if (v_d <= 0.1)
+                v_d = 0;
+            move(v_d, theta, p_theta);
 
             double x_error = x_i - x;
-            double y_error = y_i - y;
-            double theta_error = theta_i - theta;
+
+            packet.put("x_i", x_i);
+            packet.put("y_i", y_i);
+            packet.put("z_i", theta_i);
 
             packet.put("x_error", x_error);
-            packet.put("y_error", y_error);
-            packet.put("theta_error", theta_error);
 
             opMode.telemetry.addData("x_error", x_error);
-            opMode.telemetry.addData("Y_error", y_error);
-            opMode.telemetry.addData("Z_error", theta_error);
 
             opMode.telemetry.update();
             dashboard.sendTelemetryPacket(packet);
 
-
-            loopCondition = Math.abs(x_error) > 0.05 ||
-                    Math.abs(y_error) > 0.05 ||
-                    Math.abs(theta_error) > 0.05 &&
-                    timer.milliseconds() < timeout;
-
-
+            loopCondition = Math.abs(x_error) > 0.05 || v_d == 0 || Math.abs(y_i - y) >= 0.05 ||
+                    timer.seconds() < timeout || Math.abs(theta_i - theta) > 0.1;
         }
+        setAllMotors(0);
 
 
     }

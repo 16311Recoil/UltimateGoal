@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode.VistionTesting;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.opencv.core.Core;
@@ -22,6 +24,7 @@ import org.openftc.easyopencv.OpenCvPipeline;
 public class VisonTestWebcam extends LinearOpMode
 {
     OpenCvCamera webcam;
+    FtcDashboard dashboard;
 
     @Override
     public void runOpMode()
@@ -38,6 +41,7 @@ public class VisonTestWebcam extends LinearOpMode
          */
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        dashboard = FtcDashboard.getInstance();
 
         // OR...  Do Not Activate the Camera Monitor View
         //webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"));
@@ -102,6 +106,12 @@ public class VisonTestWebcam extends LinearOpMode
             telemetry.addData("Pipeline time ms", webcam.getPipelineTimeMs());
             telemetry.addData("Overhead time ms", webcam.getOverheadTimeMs());
             telemetry.addData("Theoretical max FPS", webcam.getCurrentPipelineMaxFps());
+            telemetry.addData("RingStackSize", VisionTest.SamplePipeline.getStackSize());
+            telemetry.addData("avg1", VisionTest.SamplePipeline.getAvg1());
+            telemetry.addData("avg2", VisionTest.SamplePipeline.getAvg2());
+            telemetry.addData("Count:", VisionTest.SamplePipeline.getLoopCount());
+            telemetry.addData("Time:", VisionTest.SamplePipeline.getTime());
+            telemetry.addData("Time:", VisionTest.SamplePipeline.getLoopCount() / VisionTest.SamplePipeline.getTime());
             telemetry.update();
 
             /*
@@ -162,22 +172,24 @@ public class VisonTestWebcam extends LinearOpMode
     {
         boolean viewportPaused;
 
-        static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(109,98);
+        static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(109,128);
         static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(109,198);
-        static final int COLOR_THRESHOLD = 0; //test
+        static final int UPPER_ORANGE_THRESHOLD =  100; //test
+        static final int LOWER_ORANGE_THRESHOLD =  0; //test
         static final Scalar BLUE = new Scalar(0, 0, 255);
+        static int loopCount = 0;
+        ElapsedTime timer = new ElapsedTime();
+        static double time = 0;
 
-        static final int REGION_WIDTH = 20;
+        static final int REGION_WIDTH = 80;
         static final int REGION_HEIGHT = 20;
 
-        Mat Cr = new Mat();
+        Mat Cb = new Mat();
         Mat YCrCb = new Mat();
         Mat ringTop = new Mat();
         Mat ringBot = new Mat();
-        int avg1, avg2;
-        boolean topPresent;
-        boolean botPresent;
-        int stackSize;
+        static int avg1, avg2;
+        public static int stackSize = 0;
 
         Point region1_pointA = new Point(
                 REGION1_TOPLEFT_ANCHOR_POINT.x,
@@ -192,10 +204,10 @@ public class VisonTestWebcam extends LinearOpMode
                 REGION2_TOPLEFT_ANCHOR_POINT.x + REGION_WIDTH,
                 REGION2_TOPLEFT_ANCHOR_POINT.y + REGION_HEIGHT);
 
-        void inputToCr(Mat input)
+        void inputToCb(Mat input)
         {
             Imgproc.cvtColor(input, YCrCb, Imgproc.COLOR_RGB2YCrCb);
-            Core.extractChannel(YCrCb, Cr, 1);
+            Core.extractChannel(YCrCb, Cb, 2);
         }
 
 
@@ -211,15 +223,16 @@ public class VisonTestWebcam extends LinearOpMode
              * buffer would be re-allocated the first time a real frame
              * was crunched)
              */
-            inputToCr(firstFrame);
+            inputToCb(firstFrame);
 
             /*
              * Submats are a persistent reference to a region of the parent
              * buffer. Any changes to the child affect the parent, and the
              * reverse also holds true.
              */
-            ringTop = Cr.submat(new Rect(region1_pointA, region1_pointB));
-            ringBot = Cr.submat(new Rect(region2_pointA, region2_pointB));
+            ringTop = Cb.submat(new Rect(region1_pointA, region1_pointB));
+            ringBot = Cb.submat(new Rect(region2_pointA, region2_pointB));
+            timer.reset();
         }
 
         /*
@@ -241,16 +254,18 @@ public class VisonTestWebcam extends LinearOpMode
              * of this particular frame for later use, you will need to either clone it or copy
              * it to another Mat.
              */
-            inputToCr(input);
+            inputToCb(input);
+            stackSize = 0;
 
             avg1 = (int) Core.mean(ringTop).val[0];
             avg2 = (int) Core.mean(ringBot).val[0];
 
-            if(avg1 > COLOR_THRESHOLD){
+            if(UPPER_ORANGE_THRESHOLD > avg1 && avg1 > LOWER_ORANGE_THRESHOLD){
                 stackSize += 3;
             }
 
-            if (avg2 > COLOR_THRESHOLD){
+
+            if (UPPER_ORANGE_THRESHOLD > avg2 && avg2 > LOWER_ORANGE_THRESHOLD){
                 stackSize ++;
             }
 
@@ -268,17 +283,19 @@ public class VisonTestWebcam extends LinearOpMode
                     BLUE, // The color the rectangle is drawn in
                     2); // Thickness of the rectangle lines
 
+            Mat yCbCrChan2Mat = new Mat();
+            Imgproc.cvtColor(input, yCbCrChan2Mat, Imgproc.COLOR_RGB2YCrCb);
+            Core.extractChannel(yCbCrChan2Mat, yCbCrChan2Mat, 2);
 
-
+            loopCount++;
+            time = timer.seconds();
+            return yCbCrChan2Mat;
             /**
              * NOTE: to see how to get data from your pipeline to your OpMode as well as how
              * to change which stage of the pipeline is rendered to the viewport when it is
              * tapped, please see {@link PipelineStageSwitchingExample}
              */
 
-            return input;
         }
-
-
     }
 }
