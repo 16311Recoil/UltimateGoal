@@ -32,7 +32,7 @@ public class Shooter{
     private final double PUSH_IN = 0.15;
 
     private double i = 0;
-
+    //Aditiya likes penis and balls in his ass
     private final double WOBBLE_OUT = 0.55;
     private final double WOBBLE_IN = 1;
     private final double WOBBLE_CAPTURE = 0.6;
@@ -326,6 +326,7 @@ public class Shooter{
 
     public void pusherAndGrabberControls(){
 
+
         if ((opMode_iterative.gamepad1.b && !changeB) || (opMode_iterative.gamepad2.b && !changeB2)){
             togglePusher(push);
             if (!push){
@@ -350,6 +351,7 @@ public class Shooter{
         }
         changeY = opMode_iterative.gamepad1.y;
         changeY2 = opMode_iterative.gamepad2.y;
+
     }
 
     public boolean withinPercent(double compare, double threshold, double percent){
@@ -358,7 +360,6 @@ public class Shooter{
 
     public void screwsControls(double screwPower){
         //double currPos = screwMotor.getCurrentPosition();
-
         /*
         if(opMode_iterative.gamepad1.dpad_up && !changeDpadUp){
             screwPower += 0.1;
@@ -370,6 +371,9 @@ public class Shooter{
             if (screwPower < -1)
                 screwPower = -1;
         }
+
+         */
+        /*
         if (opMode_iterative.gamepad2.left_bumper) {
             setScrewPower(-screwPower);
         }
@@ -384,11 +388,13 @@ public class Shooter{
         }
         else
             setScrewPower(0);
-        //opMode_iterative.telemetry.addData("Screw Power", screwPower);
-        //changeDpadUp = opMode_iterative.gamepad1.dpad_up;
-        //changeDpadDown = opMode_iterative.gamepad1.dpad_down;
+       opMode_iterative.telemetry.addData("Screw Power", screwPower);
+        changeDpadUp = opMode_iterative.gamepad1.dpad_up;
+        changeDpadDown = opMode_iterative.gamepad1.dpad_down;
 
          */
+
+
     }
 
     private double pidController(boolean condition, double kp, double ki, double kd, double dt, double error, double lastError){

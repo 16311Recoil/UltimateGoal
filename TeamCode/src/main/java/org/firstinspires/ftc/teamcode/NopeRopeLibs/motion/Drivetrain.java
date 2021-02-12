@@ -31,6 +31,7 @@ import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigu
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.apache.commons.math3.analysis.function.Power;
 import org.firstinspires.ftc.robotcore.internal.android.dx.ssa.EscapeAnalysis;
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.PID;
 import org.firstinspires.ftc.teamcode.util.DashboardUtil;
@@ -65,7 +66,7 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
     private List<DcMotorEx> motors;
     private double multiplier = 1;
     private int multiCounter = 1;
-    private double[] multipliers = {0.3, 0.55, 1};
+    private double[] multipliers = {0.2, 0.55, 1};
     private String[] multipliersTelemetry = {"LOW POWER", "REGULAR POWER", "HIGH POWER"};
 
     public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(0, 0, 0);
@@ -331,9 +332,9 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
 
     public void turnTo(double power, double desiredAngle, double timeout) {
         ElapsedTime timer = new ElapsedTime();
-        double currentAngle = getAngle(); //radians
+        double currentAngle = (); //radians
         if (Math.abs(desiredAngle - currentAngle) > Math.PI) {
-            desiredAngle += 360;
+            desiredAngle += Math.PI * 2;
         }
         boolean turnRight = ((currentAngle - desiredAngle) < (desiredAngle - currentAngle));
         if (turnRight) {
@@ -376,10 +377,10 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
         double y_i = pose.getY();
         double theta_i = pose.getHeading();
 
-        boolean loopCondition = Math.abs(x_i - x) >= 0.05 ||
+        boolean loopCondition = (Math.abs(x_i - x) >= 0.05 ||
                                 Math.abs(y_i - y) >= 0.05 ||
-                                Math.abs(theta_i - theta) > 0.1 ||
-                                timer.seconds() <= timeout;
+                                Math.abs(theta_i - theta) > 1) &&
+                                timer.milliseconds() <= timeout;
 
         pidX.setConstants(constants[X][kp], constants[X][ki], constants[X][kd], x);
         //pidCMotionontroller[PID_X].setConstants(constants[X][kp], constants[X][ki], constants[X][kd], x);
@@ -391,6 +392,8 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
             if (theta > Math.PI)
                 x_i*=-1;
 
+
+
             update();
             Pose2d poseEstimate = getPoseEstimate();
 
@@ -400,9 +403,12 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
 
             TelemetryPacket packet = new TelemetryPacket();
 
-            double p_x = pidX.loop(x_i, timer.milliseconds());
-            double p_y = pidY.loop(y_i, timer.milliseconds());
-            double p_theta = pidZ.loop(theta_i, timer.milliseconds());
+            double currTime = timer.milliseconds();
+
+            double p_x = pidX.loop(x_i, currTime);
+            double p_y = pidY.loop(y_i, currTime);
+            double p_theta = pidZ.loop(theta_i, currTime);
+
 
             packet.put("p_x", p_x);
             packet.put("p_y", p_y);
@@ -425,6 +431,12 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
             double v_d = Math.sqrt(Math.pow(p_x, 2) + Math.pow(p_y, 2));
             if (v_d <= 0.1)
                 v_d = 0;
+
+            if (y<0) {
+                p_theta = p_theta * -1;
+                v_d *= -1;
+            }
+
             move(v_d, theta, p_theta);
 
             double x_error = x_i - x;
@@ -440,8 +452,10 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
             opMode.telemetry.update();
             dashboard.sendTelemetryPacket(packet);
 
-            loopCondition = Math.abs(x_error) > 0.05 || v_d == 0 || Math.abs(y_i - y) >= 0.05 ||
-                    timer.seconds() < timeout || Math.abs(theta_i - theta) > 0.1;
+            loopCondition = (Math.abs(x_i - x) >= 0.05 ||
+                    Math.abs(y_i - y) >= 0.05 ||
+                    Math.abs(theta_i - theta) > 1) &&
+                    timer.milliseconds() <= timeout;
         }
         setAllMotors(0);
 
@@ -497,9 +511,11 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
         multiplier = multipliers[multiCounter];
 
 
+
         changeDpadDown = opMode_iterative.gamepad1.dpad_down;
         changeDpadUp = opMode_iterative.gamepad1.dpad_up;
 
+        opMode_iterative.telemetry.addData("power", multiplier);
     }
 
 

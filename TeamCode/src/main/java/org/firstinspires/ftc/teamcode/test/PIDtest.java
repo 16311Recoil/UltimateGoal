@@ -56,14 +56,15 @@ public class PIDtest extends LinearOpMode {
         CONSTANTS[Y][ki] = 0;
         CONSTANTS[Y][kd] = 0;
 
-        CONSTANTS[Z][kp] = 0;
+        CONSTANTS[Z][kp] = 0.03;
         CONSTANTS[Z][ki] = 0;
-        CONSTANTS[Z][kd] = 0;
+        CONSTANTS[Z][kd] = 0.13;
 
 
         waitForStart();
 
-        robot.getDrivetrain().moveToPositionPID(0, 30.0,  0, 8, CONSTANTS);
+        robot.getDrivetrain().moveToPositionPID(0, 30.0, 0, 4000, CONSTANTS);
+        robot.getDrivetrain().turnTo(0.3, Math.PI / 2, 4);
 
 
     }

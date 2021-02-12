@@ -40,7 +40,7 @@ public class Teleop extends OpMode
     private double power = 0.0;
     private boolean changeRB = true;
     private boolean changeRB2 = false;
-    private final int revolution = 750;
+    private final int revolution = 754;
     private int targetPos = 0;
     private boolean changeLB = false;
     private boolean changeLB2 = false;
@@ -132,10 +132,10 @@ public class Teleop extends OpMode
 
         if(state == TransitionState.SCREW_ACCURACY){
             if (gamepad2.left_bumper){
-                robot.getShooter().getScrewMotor().setPower(-0.2);
+                robot.getShooter().getScrewMotor().setPower(-0.6);
             }
             else if (gamepad2.right_bumper){
-                robot.getShooter().getScrewMotor().setPower(0.2);
+                robot.getShooter().getScrewMotor().setPower(0.6);
             }
             else if (gamepad2.dpad_left && !changeDpadLeft)
                 state = TransitionState.SCREW_TO_POSITION_UP;
