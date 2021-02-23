@@ -113,6 +113,14 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
         FOLLOW_TRAJECTORY
     }
 
+    public FtcDashboard getDashboard() {
+        return dashboard;
+    }
+
+    public void setDashboard(FtcDashboard dashboard) {
+        this.dashboard = dashboard;
+    }
+
     private FtcDashboard dashboard;
     private NanoClock clock;
 
@@ -330,9 +338,9 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
         setAllMotors(0);
     }
 
-    public void turnTo(double power, double desiredAngle, double timeout) {
+    public void turnTo(double power, double desiredAngle, double timeout, double initAngle) {
         ElapsedTime timer = new ElapsedTime();
-        double currentAngle = (); //radians
+        double currentAngle =  initAngle; //radians
         if (Math.abs(desiredAngle - currentAngle) > Math.PI) {
             desiredAngle += Math.PI * 2;
         }
@@ -372,14 +380,15 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
 
     public void moveToPositionPID(double x, double y, double theta, double timeout, double[][] constants){
         ElapsedTime timer = new ElapsedTime();
+        TelemetryPacket packet;
         Pose2d pose = getPoseEstimate();
         double x_i = pose.getX();
         double y_i = pose.getY();
         double theta_i = pose.getHeading();
 
-        boolean loopCondition = (Math.abs(x_i - x) >= 0.05 ||
-                                Math.abs(y_i - y) >= 0.05 ||
-                                Math.abs(theta_i - theta) > 1) &&
+        boolean loopCondition = (Math.abs(x-x_i) >= 0.05 ||
+                                Math.abs(y-y_i) >= 0.05 ||
+                                Math.abs(theta - theta_i) > 1) &&
                                 timer.milliseconds() <= timeout;
 
         pidX.setConstants(constants[X][kp], constants[X][ki], constants[X][kd], x);
@@ -387,13 +396,15 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
         pidY.setConstants(constants[Y][kp], constants[Y][ki], constants[Y][kd], y);
         pidZ.setConstants(constants[Z][kp], constants[Z][ki], constants[Z][kd], theta);
 
+        double x_error = x - x_i;
+        double y_error = y - y_i;
+        double z_error = theta - theta_i;
+
         while (loopCondition && opMode.opModeIsActive()){
+            packet = new TelemetryPacket();
 
             if (theta > Math.PI)
                 x_i*=-1;
-
-
-
             update();
             Pose2d poseEstimate = getPoseEstimate();
 
@@ -401,60 +412,51 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
             pidY.setTarget(y);
             pidZ.setTarget(theta);
 
-            TelemetryPacket packet = new TelemetryPacket();
-
             double currTime = timer.milliseconds();
 
             double p_x = pidX.loop(x_i, currTime);
             double p_y = pidY.loop(y_i, currTime);
             double p_theta = pidZ.loop(theta_i, currTime);
 
-
-            packet.put("p_x", p_x);
-            packet.put("p_y", p_y);
-            packet.put("p_theta", p_theta);
-
              x_i = poseEstimate.getX();
              y_i = poseEstimate.getY();
              theta_i = poseEstimate.getHeading();
-
-            packet.put("", pidX.toString());
-            packet.put("", pidY);
-            packet.put("", pidZ);
-
-            opMode.telemetry.addData("", pidX.toString());
-
-            opMode.telemetry.addData("p_x", p_x);
-            opMode.telemetry.addData("p_y", p_y);
-            opMode.telemetry.addData("p_z", p_theta);
 
             double v_d = Math.sqrt(Math.pow(p_x, 2) + Math.pow(p_y, 2));
             if (v_d <= 0.1)
                 v_d = 0;
 
-            if (y<0) {
+            /*
+            if (y < 0) {
                 p_theta = p_theta * -1;
                 v_d *= -1;
             }
 
+             */
+
             move(v_d, theta, p_theta);
 
-            double x_error = x_i - x;
+            x_error = x - x_i;
+            y_error = y - y_i;
+            z_error = theta - theta_i;
+
+            packet.put("p_x", p_x);
+            packet.put("p_y", p_y);
+            packet.put("p_theta", p_theta);
 
             packet.put("x_i", x_i);
             packet.put("y_i", y_i);
             packet.put("z_i", theta_i);
 
             packet.put("x_error", x_error);
+            packet.put("y_error", y_error);
+            packet.put("z_error", z_error);
 
-            opMode.telemetry.addData("x_error", x_error);
-
-            opMode.telemetry.update();
             dashboard.sendTelemetryPacket(packet);
 
-            loopCondition = (Math.abs(x_i - x) >= 0.05 ||
-                    Math.abs(y_i - y) >= 0.05 ||
-                    Math.abs(theta_i - theta) > 1) &&
+            loopCondition = (Math.abs(x - x_i) >= 0.05 ||
+                    Math.abs(y - y_i) >= 0.05 ||
+                    Math.abs(theta - theta_i) > 0.05) &&
                     timer.milliseconds() <= timeout;
         }
         setAllMotors(0);
@@ -590,15 +592,15 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
         TelemetryPacket packet = new TelemetryPacket();
         Canvas fieldOverlay = packet.fieldOverlay();
 
-        packet.put("mode", mode);
+        //packet.put("mode", mode);
 
-        packet.put("x", currentPose.getX());
-        packet.put("y", currentPose.getY());
-        packet.put("heading", currentPose.getHeading());
+        //packet.put("x", currentPose.getX());
+        //packet.put("y", currentPose.getY());
+        //packet.put("heading", currentPose.getHeading());
 
-        packet.put("xError", lastError.getX());
-        packet.put("yError", lastError.getY());
-        packet.put("headingError", lastError.getHeading());
+        //packet.put("xError", lastError.getX());
+        //packet.put("yError", lastError.getY());
+        //packet.put("headingError", lastError.getHeading());
 
         switch (mode) {
             case IDLE:
