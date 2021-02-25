@@ -9,7 +9,7 @@ public class PID {
     private double previousTime;
     private double target;
     private double i_sum = 0;
-    private final double MAX_SUM = 0;
+    //private final double MAX_SUM = 6000;
 
 
     public PID() {
@@ -53,13 +53,16 @@ public class PID {
         double deltaTime = curTime - previousTime;
 
         i_sum += 0.5 * (previousError + error) * deltaTime;
+        /*
         if (i_sum > MAX_SUM){
             i_sum = MAX_SUM;
         }
 
+         */
+
         p = error * k_p;
         i = i_sum * k_i;
-        d = (error - previousError) / deltaTime * k_d;
+        d = ((error - previousError) / deltaTime) * k_d;
 
         previousError = error;
         previousTime = curTime;

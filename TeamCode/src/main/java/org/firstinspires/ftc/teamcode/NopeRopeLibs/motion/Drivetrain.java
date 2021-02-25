@@ -423,8 +423,10 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
              theta_i = poseEstimate.getHeading();
 
             double v_d = Math.sqrt(Math.pow(p_x, 2) + Math.pow(p_y, 2));
-            if (v_d <= 0.1)
+
+            if (v_d <= 0.1) {
                 v_d = 0;
+            }
 
             /*
             if (y < 0) {
@@ -460,8 +462,6 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
                     timer.milliseconds() <= timeout;
         }
         setAllMotors(0);
-
-
     }
     //================================================================= Tele-Op Methods ===============================================================//
 

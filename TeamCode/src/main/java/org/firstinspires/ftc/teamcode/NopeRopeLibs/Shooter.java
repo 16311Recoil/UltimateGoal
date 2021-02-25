@@ -325,8 +325,6 @@ public class Shooter{
     //}
 
     public void pusherAndGrabberControls(){
-
-
         if ((opMode_iterative.gamepad1.b && !changeB) || (opMode_iterative.gamepad2.b && !changeB2)){
             togglePusher(push);
             if (!push){

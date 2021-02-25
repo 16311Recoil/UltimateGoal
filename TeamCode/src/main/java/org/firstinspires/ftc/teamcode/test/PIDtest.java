@@ -16,8 +16,6 @@ public class PIDtest extends LinearOpMode {
     FtcDashboard dash;
     double[][] CONSTANTS = new double[3][3];
 
-    private PID test;
-
     private static final int X = 0;
     private static final int Y = 1;
     private static final int Z = 2;
@@ -25,6 +23,11 @@ public class PIDtest extends LinearOpMode {
     private static final int kp = 0;
     private static final int ki = 1;
     private static final int kd = 2;
+
+    private static final double FORWARD = Math.PI/2;
+    private static final double BACKWARD = 3 * Math.PI/2;
+    private static final double LEFT = Math.PI;
+    private static final double RIGHT = 2 * Math.PI;
 
 
     @Override
@@ -41,9 +44,18 @@ public class PIDtest extends LinearOpMode {
 
          */
 
-        CONSTANTS[X][kp] = 0.8 / 30.0;
-        CONSTANTS[X][ki] = 0;
-        CONSTANTS[X][kd] = 0;
+
+        waitForStart();
+
+        //robot.getDrivetrain().moveToPositionPID(30.0, 0,  3 * Math.PI/2, 8, CONSTANTS);
+
+
+
+        // MOVEMENT 1 ==============================================================================================
+        //move to scan the starter stack
+        CONSTANTS[X][kp] = 0.90 / 60.0;
+        CONSTANTS[X][ki] = 0.000;
+        CONSTANTS[X][kd] = 0.1;
 
         CONSTANTS[Y][kp] = 0;;
         CONSTANTS[Y][ki] = 0;
@@ -54,13 +66,32 @@ public class PIDtest extends LinearOpMode {
         CONSTANTS[Z][kd] = 0;
 
 
+        robot.getDrivetrain().moveToPositionPID(70.0, 0,  BACKWARD, 6 * (1000), CONSTANTS); // dec time by 1?
 
 
-        waitForStart();
 
-        //robot.getDrivetrain().moveToPositionPID(30.0, 0,  3 * Math.PI/2, 8, CONSTANTS);
+        // MOVEMENT 2 ==============================================================================================
+        /* strafe to see the starter stack
+        CONSTANTS[X][kp] = 0.97 / 60.0;
+        CONSTANTS[X][ki] = 0.000;
+        CONSTANTS[X][kd] = 0.00;
+
+        CONSTANTS[Y][kp] = 0;;
+        CONSTANTS[Y][ki] = 0;
+        CONSTANTS[Y][kd] = 0;
+
+        CONSTANTS[Z][kp] = 0;
+        CONSTANTS[Z][ki] = 0;
+        CONSTANTS[Z][kd] = 0;
 
 
+        robot.getDrivetrain().moveToPositionPID(60.0, 0,  FORWARD, 6 * (1000), CONSTANTS); // dec time by 1?
+
+         */
+
+
+        // STRAFE RIGHT 48 INCHES
+        /*
 
         double targetDistance = 48.0;
 
@@ -78,6 +109,8 @@ public class PIDtest extends LinearOpMode {
 
         robot.getDrivetrain().moveToPositionPID(0, targetDistance, 2* Math.PI, 100000, CONSTANTS);
         //robot.getDrivetrain().turnTo(0.3, Math.PI / 2, 4);
+
+         */
 
     }
 
