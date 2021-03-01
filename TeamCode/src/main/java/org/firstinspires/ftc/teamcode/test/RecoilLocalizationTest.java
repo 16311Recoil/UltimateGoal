@@ -8,10 +8,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.NopeRopeLibs.Sensors;
+import org.firstinspires.ftc.teamcode.NopeRopeLibs.Subsystems.Sensors;
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.Drivetrain;
-import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.MecanumDrive;
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 /**
  * This is a simple teleop routine for testing localization. Drive the robot around like a normal

@@ -1,17 +1,10 @@
 package org.firstinspires.ftc.teamcode.test;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.NopeRope;
-import org.firstinspires.ftc.teamcode.NopeRopeLibs.PID;
-
-import java.text.Normalizer;
 
 @TeleOp(name = "PID TEST", group = "Testing")
 public class PIDtest extends LinearOpMode {

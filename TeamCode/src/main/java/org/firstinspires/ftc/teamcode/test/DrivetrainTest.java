@@ -4,9 +4,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.NopeRopeLibs.Sensors;
+import org.firstinspires.ftc.teamcode.NopeRopeLibs.Subsystems.Sensors;
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.Drivetrain;
-import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.TrackingWheelLocalizer;
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.TwoWheelLocalizer;
 
 
