@@ -463,6 +463,52 @@ public class Drivetrain extends com.acmerobotics.roadrunner.drive.MecanumDrive{
         }
         setAllMotors(0);
     }
+
+    public void turnPID(double theta, double timeout, double[][] constants){
+        ElapsedTime timer = new ElapsedTime();
+        TelemetryPacket packet;
+        Pose2d pose = getPoseEstimate();
+        double theta_i = pose.getHeading();
+
+        boolean loopCondition = Math.abs(theta - theta_i) > 1 && timer.milliseconds() <= timeout;
+
+        pidZ.setConstants(constants[Z][kp], constants[Z][ki], constants[Z][kd], theta);
+
+        double z_error = theta - theta_i;
+
+        while (loopCondition && opMode.opModeIsActive()){
+            packet = new TelemetryPacket();
+
+            update();
+            Pose2d poseEstimate = getPoseEstimate();
+
+
+            pidZ.setTarget(theta);
+
+            double currTime = timer.milliseconds();
+
+            double p_theta = pidZ.loop(theta_i, currTime);
+            theta_i = poseEstimate.getHeading();
+
+
+            move(0, theta, p_theta);
+
+            z_error = theta - theta_i;
+
+            packet.put("p_theta", p_theta);
+
+            packet.put("z_i", theta_i);
+
+            packet.put("z_error", z_error);
+
+            dashboard.sendTelemetryPacket(packet);
+
+            loopCondition =
+                    Math.abs(theta - theta_i) > 0.05 &&
+                    timer.milliseconds() <= timeout;
+        }
+        setAllMotors(0);
+    }
     //================================================================= Tele-Op Methods ===============================================================//
 
     public void moveTelop(double x, double y, double z) {

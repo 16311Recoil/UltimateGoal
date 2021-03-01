@@ -9,6 +9,8 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
@@ -29,6 +31,7 @@ public class DistanceSensorsTest extends LinearOpMode {
 
      */
     NormalizedColorSensor colorSensor;
+    DcMotor motor;
     View relativeLayout;
     final float[] hsvValues = new float[3];
     float gain = 2;
@@ -74,6 +77,8 @@ public class DistanceSensorsTest extends LinearOpMode {
                 }
             });
         }
+
+        motor = hardwareMap.dcMotor.get("screwMotor");
         telemetry.addData(">>", "Press start to continue");
         telemetry.update();
 
@@ -99,6 +104,8 @@ public class DistanceSensorsTest extends LinearOpMode {
             } else if (gamepad1.b && gain > 1) { // A gain of less than 1 will make the values smaller, which is not helpful.
                 gain -= 0.005;
             }
+
+
 
             // Show the gain value via telemetry
             telemetry.addData("Gain", gain);
@@ -152,6 +159,13 @@ public class DistanceSensorsTest extends LinearOpMode {
             packet.put("Alpha", colors.alpha);
 
             dashboard.sendTelemetryPacket(packet);
+
+            if (colors.blue > colors.red){
+                motor.setPower(0);
+            }
+            else{
+                motor.setPower(0.4);
+            }
 
             /* If this color sensor also has a distance sensor, display the measured distance.
              * Note that the reported distance is only useful at very close range, and is impacted by

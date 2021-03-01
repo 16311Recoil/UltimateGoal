@@ -395,6 +395,15 @@ public class Shooter{
 
     }
 
+    public void doRotation(){
+        ElapsedTime timer = new ElapsedTime();
+
+        while (timer.milliseconds() < 100){
+        }
+
+    }
+
+
     private double pidController(boolean condition, double kp, double ki, double kd, double dt, double error, double lastError){
         double p = 0 , d = 0;
         if (condition){

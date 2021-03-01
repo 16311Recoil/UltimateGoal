@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode.NopeRopeLibs;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -58,6 +59,7 @@ public class VisionTensorFlow extends LinearOpMode {
     private static final String TFOD_MODEL_ASSET = "UltimateGoal.tflite";
     private static final String LABEL_FIRST_ELEMENT = "Quad";
     private static final String LABEL_SECOND_ELEMENT = "Single";
+    FtcDashboard dashboard;
 
     /*
      * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
@@ -92,6 +94,7 @@ public class VisionTensorFlow extends LinearOpMode {
         // first.
         initVuforia();
         initTfod();
+        dashboard = FtcDashboard.getInstance();
 
         /**
          * Activate TensorFlow Object Detection before we wait for the start command.
@@ -116,6 +119,7 @@ public class VisionTensorFlow extends LinearOpMode {
         telemetry.update();
         waitForStart();
 
+
         if (opModeIsActive()) {
             ElapsedTime timer = new ElapsedTime();
             while (opModeIsActive()) {
@@ -130,6 +134,7 @@ public class VisionTensorFlow extends LinearOpMode {
                       // step through the list of recognitions and display boundary info.
                       int i = 0;
                       for (Recognition recognition : updatedRecognitions) {
+                          dashboard.sendImage(vuforia.convertFrameToBitmap(vuforia.getFrameQueue().peek()));
                         telemetry.addData(String.format("label (%d)", i), recognition.getLabel());
                         telemetry.addData(String.format("  left,top (%d)", i), "%.03f , %.03f",
                                           recognition.getLeft(), recognition.getTop());
