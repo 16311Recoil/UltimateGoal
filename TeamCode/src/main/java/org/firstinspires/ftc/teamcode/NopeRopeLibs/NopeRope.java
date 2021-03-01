@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.NopeRopeLibs;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
@@ -23,20 +24,20 @@ public class NopeRope {
     private Intake intake;
     private VisionTensorFlow vision1;
     private boolean[] sensorsArray;
+    private FtcDashboard dashboard;
 
 
 
     public NopeRope(LinearOpMode opMode) throws InterruptedException { //decide which path to take here?
         auto = opMode;
-        sensors = new Sensors(auto);
+        dashboard = FtcDashboard.getInstance();
+        sensors = new Sensors(auto, dashboard);
         drivetrain = new Drivetrain(auto, sensors.getLocalizer());
         shooter = new Shooter(auto);
         vision1 = new VisionTensorFlow();
         sensorsArray = new boolean[2];
        // sensorsArray[0] = sensors.getShooterValid();
        // sensorsArray[1] = sensors.getTransitionValid();
-
-        // Webcam in sensors?
     }
 
     public NopeRope(OpMode opMode) throws InterruptedException {
@@ -192,6 +193,7 @@ public class NopeRope {
             return;
         //toggles wobble grabber
     }
+
     public Sensors getSensors() {
         return sensors;
     }
