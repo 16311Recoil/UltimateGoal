@@ -1,49 +1,49 @@
 package org.firstinspires.ftc.teamcode.NopeRopeLibs;
 
 
-import android.app.Activity;
-import android.graphics.Color;
-import android.view.View;
+import android.graphics.Path;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
-import com.qualcomm.robotcore.hardware.SwitchableLight;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.vuforia.PIXEL_FORMAT;
+import com.vuforia.Vuforia;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.teamcode.NopeRopeLibs.Vision.ringDetectionPipeline;
+import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.TrackingWheelLocalizer;
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.TwoWheelLocalizer;
 import org.firstinspires.ftc.teamcode.util.Encoder;
 import org.firstinspires.ftc.teamcode.util.LynxModuleUtil;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvWebcam;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Sensors {
 
     public BNO055IMU gyro;
     private Orientation angles;
+    private Acceleration gravity;
+    private BNO055IMU.Parameters parameters;
+
     // Encoders used for odometry
     private TwoWheelLocalizer localizer;
     private List<LynxModule> allHubs;
-    private OpMode teleOp;
-    private LinearOpMode auto;
+    private OpMode opmode;
+    private LinearOpMode opMode;
+
+
+    private static int count = 0;
 
     // Used for logging cycle reads.
     private ElapsedTime readTimer;
@@ -54,21 +54,10 @@ public class Sensors {
     private DistanceSensor transitionValidation;
     private DistanceSensor shooterValidation;
 
-    NormalizedColorSensor colorSensor;
-    DcMotor motor;
-    View relativeLayout;
-    final float[] hsvValues = new float[3];
-    float gain = 2;
-
-    private FtcDashboard dashboard;
-
     public List<Encoder> encoders;
 
     public double[] positionVals;
     public double[] velocityVals;
-    private static int stackSize;
-
-    private OpenCvWebcam webcam;
 
     private boolean autoBulkRead = true;
 
@@ -79,7 +68,8 @@ public class Sensors {
 
 
     public Sensors(OpMode opMode){
-        this.teleOp = opMode;
+
+        this.opmode = opMode;
         // Gets all REV Hubs
         LynxModuleUtil.ensureMinimumFirmwareVersion(opMode.hardwareMap);
         allHubs = opMode.hardwareMap.getAll(LynxModule.class);
@@ -90,28 +80,6 @@ public class Sensors {
         transition = (Rev2mDistanceSensor) transitionValidation;
         shooter = (Rev2mDistanceSensor) shooterValidation;
 
-        int relativeLayoutId = opMode.hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", opMode.hardwareMap.appContext.getPackageName());
-        relativeLayout = ((Activity) opMode.hardwareMap.appContext).findViewById(relativeLayoutId);
-
-        try {
-            colorSensor = teleOp.hardwareMap.get(NormalizedColorSensor.class, "sensor_color");
-
-            if (colorSensor instanceof SwitchableLight) {
-                ((SwitchableLight)colorSensor).enableLight(true);
-            }
-
-            // actually execute the sample
-        } finally {
-            // On the way out, *guarantee* that the background is reasonable. It doesn't actually start off
-            // as pure white, but it's too much work to dig out what actually was used, and this is good
-            // enough to at least make the screen reasonable again.
-            // Set the panel back to the default color
-            relativeLayout.post(new Runnable() {
-                public void run() {
-                    relativeLayout.setBackgroundColor(Color.WHITE);
-                }
-            });
-        }
 
 
         for (LynxModule module : allHubs) {
@@ -149,41 +117,18 @@ public class Sensors {
          */
     }
 
-    public Sensors(LinearOpMode opMode, FtcDashboard dashboard){
-        this.auto = opMode;
-        // Gets all REV Hubs
-        LynxModuleUtil.ensureMinimumFirmwareVersion(teleOp.hardwareMap);
-        allHubs = teleOp.hardwareMap.getAll(LynxModule.class);
+    public Sensors(LinearOpMode opMode){
 
-        transitionValidation = teleOp.hardwareMap.get(DistanceSensor.class, "transitionDS");
-        shooterValidation = teleOp.hardwareMap.get(DistanceSensor.class, "shooterDS");
+        this.opmode = opMode;
+        // Gets all REV Hubs
+        LynxModuleUtil.ensureMinimumFirmwareVersion(opMode.hardwareMap);
+        allHubs = opMode.hardwareMap.getAll(LynxModule.class);
+
+        transitionValidation = opMode.hardwareMap.get(DistanceSensor.class, "transitionDS");
+        shooterValidation = opMode.hardwareMap.get(DistanceSensor.class, "shooterDS");
 
         transition = (Rev2mDistanceSensor) transitionValidation;
         shooter = (Rev2mDistanceSensor) shooterValidation;
-
-        stackSize = -1;
-        int relativeLayoutId = teleOp.hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", teleOp.hardwareMap.appContext.getPackageName());
-        relativeLayout = ((Activity) teleOp.hardwareMap.appContext).findViewById(relativeLayoutId);
-
-        try {
-            colorSensor = auto.hardwareMap.get(NormalizedColorSensor.class, "sensor_color");
-
-            if (colorSensor instanceof SwitchableLight) {
-                ((SwitchableLight)colorSensor).enableLight(true);
-            }
-
-            // actually execute the sample
-        } finally {
-            // On the way out, *guarantee* that the background is reasonable. It doesn't actually start off
-            // as pure white, but it's too much work to dig out what actually was used, and this is good
-            // enough to at least make the screen reasonable again.
-            // Set the panel back to the default color
-            relativeLayout.post(new Runnable() {
-                public void run() {
-                    relativeLayout.setBackgroundColor(Color.WHITE);
-                }
-            });
-        }
 
         // Hardware Maps All of the Encoders
 
@@ -207,10 +152,6 @@ public class Sensors {
 
         localizer = new TwoWheelLocalizer(opMode.hardwareMap, this);
         setEncoders((List<Encoder>) localizer.getEncoders());
-
-        int cameraMonitorViewId = opMode.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", opMode.hardwareMap.appContext.getPackageName());
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(opMode.hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        this.dashboard = FtcDashboard.getInstance();
 
         // Vuforia Initialization
         /*
@@ -329,11 +270,6 @@ public class Sensors {
         angles = gyro.getAngularOrientation();
     }
 
-    public boolean isScrewRevolution(){
-        NormalizedRGBA colors = colorSensor.getNormalizedColors();
-        return (colors.blue > colors.red);
-    }
-
     // Bulk Reads Sensor Data to update all values for use.
     public void updateSensorVals(){
         updateGyro();
@@ -370,34 +306,4 @@ public class Sensors {
         }
 
     }
-
-    public void startScanning(){
-        webcam.setPipeline(new ringDetectionPipeline());
-        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-        {
-            @Override
-            public void onOpened()
-            {
-                webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
-            }
-        });
-    }
-    public void scan(){
-        TelemetryPacket packet = new TelemetryPacket();
-        stackSize = ringDetectionPipeline.stackSize;
-        if (stackSize < 0) {
-            packet.addLine("ERROR IN DETECTING STACK SIZE");
-            dashboard.sendTelemetryPacket(packet);
-            stackSize = 0;
-        } else{
-            packet.put("Stack Size", stackSize);
-        }
-        dashboard.sendTelemetryPacket(packet);
-    }
-
-
-    public void stopScanning(){
-        webcam.stopStreaming();
-    }
-
 }

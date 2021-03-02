@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.NopeRopeLibs.Vision.ringDetectionPipeline;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -52,7 +51,7 @@ public class VisonTestWebcam extends LinearOpMode
          * of a frame from the camera. Note that switching pipelines on-the-fly
          * (while a streaming session is in flight) *IS* supported.
          */
-        webcam.setPipeline(new ringDetectionPipeline());
+        webcam.setPipeline(new SamplePipeline());
 
         /*
          * Open the connection to the camera device. New in v1.4.0 is the ability
@@ -63,6 +62,30 @@ public class VisonTestWebcam extends LinearOpMode
          *
          * If you really want to open synchronously, the old method is still available.
          */
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        {
+            @Override
+            public void onOpened()
+            {
+                /*
+                 * Tell the webcam to start streaming images to us! Note that you must make sure
+                 * the resolution you specify is supported by the camera. If it is not, an exception
+                 * will be thrown.
+                 *
+                 * Keep in mind that the SDK's UVC driver (what OpenCvWebcam uses under the hood) only
+                 * supports streaming from the webcam in the uncompressed YUV image format. This means
+                 * that the maximum resolution you can stream at and still get up to 30FPS is 480p (640x480).
+                 * Streaming at e.g. 720p will limit you to up to 10FPS and so on and so forth.
+                 *
+                 * Also, we specify the rotation that the webcam is used in. This is so that the image
+                 * from the camera sensor can be rotated such that it is always displayed with the image upright.
+                 * For a front facing camera, rotation is defined assuming the user is looking at the screen.
+                 * For a rear facing camera or a webcam, rotation is defined assuming the camera is facing
+                 * away from the user.
+                 */
+                webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+            }
+        });
 
         telemetry.addLine("Waiting for start");
         telemetry.update();
@@ -130,4 +153,149 @@ public class VisonTestWebcam extends LinearOpMode
         }
     }
 
+    /*
+     * An example image processing pipeline to be run upon receipt of each frame from the camera.
+     * Note that the processFrame() method is called serially from the frame worker thread -
+     * that is, a new camera frame will not come in while you're still processing a previous one.
+     * In other words, the processFrame() method will never be called multiple times simultaneously.
+     *
+     * However, the rendering of your processed image to the viewport is done in parallel to the
+     * frame worker thread. That is, the amount of time it takes to render the image to the
+     * viewport does NOT impact the amount of frames per second that your pipeline can process.
+     *
+     * IMPORTANT NOTE: this pipeline is NOT invoked on your OpMode thread. It is invoked on the
+     * frame worker thread. This should not be a problem in the vast majority of cases. However,
+     * if you're doing something weird where you do need it synchronized with your OpMode thread,
+     * then you will need to account for that accordingly.
+     */
+    public static class SamplePipeline extends OpenCvPipeline
+    {
+        boolean viewportPaused;
+
+        static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(109,128);
+        static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(109,198);
+        static final int UPPER_ORANGE_THRESHOLD =  100; //test
+        static final int LOWER_ORANGE_THRESHOLD =  0; //test
+        static final Scalar BLUE = new Scalar(0, 0, 255);
+        static int loopCount = 0;
+        ElapsedTime timer = new ElapsedTime();
+        static double time = 0;
+
+        static final int REGION_WIDTH = 80;
+        static final int REGION_HEIGHT = 20;
+
+        Mat Cb = new Mat();
+        Mat YCrCb = new Mat();
+        Mat ringTop = new Mat();
+        Mat ringBot = new Mat();
+        static int avg1, avg2;
+        public static int stackSize = 0;
+
+        Point region1_pointA = new Point(
+                REGION1_TOPLEFT_ANCHOR_POINT.x,
+                REGION1_TOPLEFT_ANCHOR_POINT.y);
+        Point region1_pointB = new Point(
+                REGION1_TOPLEFT_ANCHOR_POINT.x + REGION_WIDTH,
+                REGION1_TOPLEFT_ANCHOR_POINT.y + REGION_HEIGHT);
+        Point region2_pointA = new Point(
+                REGION2_TOPLEFT_ANCHOR_POINT.x,
+                REGION2_TOPLEFT_ANCHOR_POINT.y);
+        Point region2_pointB = new Point(
+                REGION2_TOPLEFT_ANCHOR_POINT.x + REGION_WIDTH,
+                REGION2_TOPLEFT_ANCHOR_POINT.y + REGION_HEIGHT);
+
+        void inputToCb(Mat input)
+        {
+            Imgproc.cvtColor(input, YCrCb, Imgproc.COLOR_RGB2YCrCb);
+            Core.extractChannel(YCrCb, Cb, 2);
+        }
+
+
+        @Override
+        public void init(Mat firstFrame)
+        {
+            /*
+             * We need to call this in order to make sure the 'Cb'
+             * object is initialized, so that the submats we make
+             * will still be linked to it on subsequent frames. (If
+             * the object were to only be initialized in processFrame,
+             * then the submats would become delinked because the backing
+             * buffer would be re-allocated the first time a real frame
+             * was crunched)
+             */
+            inputToCb(firstFrame);
+
+            /*
+             * Submats are a persistent reference to a region of the parent
+             * buffer. Any changes to the child affect the parent, and the
+             * reverse also holds true.
+             */
+            ringTop = Cb.submat(new Rect(region1_pointA, region1_pointB));
+            ringBot = Cb.submat(new Rect(region2_pointA, region2_pointB));
+            timer.reset();
+        }
+
+        /*
+         * NOTE: if you wish to use additional Mat objects in your processing pipeline, it is
+         * highly recommended to declare them here as instance variables and re-use them for
+         * each invocation of processFrame(), rather than declaring them as new local variables
+         * each time through processFrame(). This removes the danger of causing a memory leak
+         * by forgetting to call mat.release(), and it also reduces memory pressure by not
+         * constantly allocating and freeing large chunks of memory.
+         */
+
+        @Override
+        public Mat processFrame(Mat input)
+        {
+            /*
+             * IMPORTANT NOTE: the input Mat that is passed in as a parameter to this method
+             * will only dereference to the same image for the duration of this particular
+             * invocation of this method. That is, if for some reason you'd like to save a copy
+             * of this particular frame for later use, you will need to either clone it or copy
+             * it to another Mat.
+             */
+            inputToCb(input);
+            stackSize = 0;
+
+            avg1 = (int) Core.mean(ringTop).val[0];
+            avg2 = (int) Core.mean(ringBot).val[0];
+
+            if(UPPER_ORANGE_THRESHOLD > avg1 && avg1 > LOWER_ORANGE_THRESHOLD){
+                stackSize += 3;
+            }
+
+
+            if (UPPER_ORANGE_THRESHOLD > avg2 && avg2 > LOWER_ORANGE_THRESHOLD){
+                stackSize ++;
+            }
+
+            Imgproc.rectangle(
+                    input, // Buffer to draw on
+                    region1_pointA, // First point which defines the rectangle
+                    region1_pointB, // Second point which defines the rectangle
+                    BLUE, // The color the rectangle is drawn in
+                    2); // Thickness of the rectangle lines
+
+            Imgproc.rectangle(
+                    input, // Buffer to draw on
+                    region1_pointA, // First point which defines the rectangle
+                    region1_pointB, // Second point which defines the rectangle
+                    BLUE, // The color the rectangle is drawn in
+                    2); // Thickness of the rectangle lines
+
+            Mat yCbCrChan2Mat = new Mat();
+            Imgproc.cvtColor(input, yCbCrChan2Mat, Imgproc.COLOR_RGB2YCrCb);
+            Core.extractChannel(yCbCrChan2Mat, yCbCrChan2Mat, 2);
+
+            loopCount++;
+            time = timer.seconds();
+            return yCbCrChan2Mat;
+            /**
+             * NOTE: to see how to get data from your pipeline to your OpMode as well as how
+             * to change which stage of the pipeline is rendered to the viewport when it is
+             * tapped, please see {@link PipelineStageSwitchingExample}
+             */
+
+        }
+    }
 }
