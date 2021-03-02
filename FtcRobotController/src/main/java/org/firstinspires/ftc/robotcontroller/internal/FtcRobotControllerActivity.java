@@ -383,12 +383,7 @@ public class FtcRobotControllerActivity extends Activity
 
     FtcAboutActivity.setBuildTimeFromBuildConfig(BuildConfig.BUILD_TIME);
 
-<<<<<<< HEAD
     FtcDashboard.start();
-=======
-    // check to see if there is a preferred Wi-Fi to use.
-    checkPreferredChannel();
->>>>>>> cd037e0e744335a58f2b28ce9e0ad7e87cc024ac
   }
 
   protected UpdateUI createUpdateUI() {
@@ -409,6 +404,17 @@ public class FtcRobotControllerActivity extends Activity
   protected void onStart() {
     super.onStart();
     RobotLog.vv(TAG, "onStart()");
+
+    // If we're start()ing after a stop(), then shut the old robot down so
+    // we can refresh it with new state (e.g., with new hw configurations)
+    shutdownRobot();
+
+    updateUIAndRequestRobotSetup();
+
+    cfgFileMgr.getActiveConfigAndUpdateUI();
+
+    // check to see if there is a preferred Wi-Fi to use.
+    checkPreferredChannel();
 
     entireScreenLayout.setOnTouchListener(new View.OnTouchListener() {
       @Override
