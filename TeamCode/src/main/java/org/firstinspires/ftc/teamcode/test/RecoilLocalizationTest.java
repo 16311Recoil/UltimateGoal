@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.NopeRopeLibs.Sensors;
+import org.firstinspires.ftc.teamcode.NopeRopeLibs.subsystems.Sensors;
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.Drivetrain;
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.MecanumDrive;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;

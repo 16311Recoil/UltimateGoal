@@ -8,8 +8,9 @@ import com.acmerobotics.roadrunner.localization.TwoTrackingWheelLocalizer;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.NopeRopeLibs.Sensors;
+import org.firstinspires.ftc.teamcode.NopeRopeLibs.subsystems.Sensors;
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.Drivetrain;
+import org.firstinspires.ftc.teamcode.NopeRopeLibs.subsystems.Sensors;
 import org.firstinspires.ftc.teamcode.util.Encoder;
 
 import java.util.Arrays;

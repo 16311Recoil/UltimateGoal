@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.NopeRopeLibs.Intake;
+import org.firstinspires.ftc.teamcode.NopeRopeLibs.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.NopeRope;
 
 @TeleOp(name="IntakeTest", group="Iterative Opmode")
