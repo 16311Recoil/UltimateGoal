@@ -4,10 +4,6 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import org.firstinspires.ftc.teamcode.NopeRopeLibs.Subsystems.Intake;
-import org.firstinspires.ftc.teamcode.NopeRopeLibs.Subsystems.Sensors;
-import org.firstinspires.ftc.teamcode.NopeRopeLibs.Subsystems.Shooter;
-import org.firstinspires.ftc.teamcode.NopeRopeLibs.Vision.Webcam;
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.Drivetrain;
 
 public class NopeRope {
@@ -20,9 +16,6 @@ public class NopeRope {
     private static final int INTAKE = 2;
 
     private static double MULTIPLIER = 0.787401574803;
-
-
-
 
     private final Drivetrain drivetrain;
     private final Sensors sensors;

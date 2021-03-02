@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.NopeRopeLibs.Vision;
+package org.firstinspires.ftc.teamcode.NopeRopeLibs;
 
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;

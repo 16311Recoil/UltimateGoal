@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.NopeRopeLibs.Sensors;
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.Drivetrain;
 
 @TeleOp(name="Move Test", group="Iterative Opmode")

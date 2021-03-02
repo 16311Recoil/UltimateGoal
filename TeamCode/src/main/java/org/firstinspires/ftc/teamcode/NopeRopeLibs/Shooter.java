@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.NopeRopeLibs.Subsystems;
+package org.firstinspires.ftc.teamcode.NopeRopeLibs;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.NopeRopeLibs.Subsystems;
+package org.firstinspires.ftc.teamcode.NopeRopeLibs;
 
 
 import android.app.Activity;
@@ -387,11 +387,10 @@ public class Sensors {
         stackSize = ringDetectionPipeline.stackSize;
         if (stackSize < 0) {
             packet.addLine("ERROR IN DETECTING STACK SIZE");
-            auto.telemetry.addLine("ERROR IN DETECTING STACK SIZE");
+            dashboard.sendTelemetryPacket(packet);
             stackSize = 0;
         } else{
             packet.put("Stack Size", stackSize);
-            auto.telemetry.addData("Stack Size", stackSize);
         }
         dashboard.sendTelemetryPacket(packet);
     }
