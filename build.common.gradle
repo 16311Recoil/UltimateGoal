@@ -75,7 +75,6 @@ android {
     // http://google.github.io/android-gradle-dsl/current/com.android.build.gradle.internal.dsl.BuildType.html
     buildTypes {
         release {
-            signingConfig signingConfigs.release
 
             ndk {
                 abiFilters "armeabi-v7a"
@@ -100,7 +99,6 @@ android {
         jni.srcDirs = []
         jniLibs.srcDir rootProject.file('libs')
     }
-    ndkVersion '21.3.6528147'
 }
 
 repositories {
@@ -109,4 +107,5 @@ repositories {
     }
     jcenter()
 }
+apply from: 'build.release.gradle'
 
