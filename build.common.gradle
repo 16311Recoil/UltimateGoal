@@ -47,6 +47,7 @@ android {
         }
     }
 
+
     aaptOptions {
         noCompress "tflite"
     }
@@ -116,6 +117,11 @@ android {
         jniLibs.srcDir rootProject.file('libs')
     }
     ndkVersion '21.3.6528147'
+}
+allprojects {
+    tasks.withType(JavaCompile) {
+        options.deprecation = true
+    }
 }
 
 repositories {
