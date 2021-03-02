@@ -664,7 +664,9 @@ public class FtcRobotControllerActivity extends Activity
     // was some historical confusion about launch codes here, so we err safely
     if (request == RequestCode.CONFIGURE_ROBOT_CONTROLLER.ordinal() || request == RequestCode.SETTINGS_ROBOT_CONTROLLER.ordinal()) {
       // We always do a refresh, whether it was a cancel or an OK, for robustness
+      shutdownRobot();
       cfgFileMgr.getActiveConfigAndUpdateUI();
+      updateUIAndRequestRobotSetup();
     }
   }
 
