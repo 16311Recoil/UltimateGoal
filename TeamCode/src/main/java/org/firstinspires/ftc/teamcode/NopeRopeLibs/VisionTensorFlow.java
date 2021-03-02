@@ -59,7 +59,7 @@ public class VisionTensorFlow extends LinearOpMode {
     private static final String TFOD_MODEL_ASSET = "UltimateGoal.tflite";
     private static final String LABEL_FIRST_ELEMENT = "Quad";
     private static final String LABEL_SECOND_ELEMENT = "Single";
-    FtcDashboard dashboard;
+    FtcDashboard dashboard; 
 
     /*
      * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
