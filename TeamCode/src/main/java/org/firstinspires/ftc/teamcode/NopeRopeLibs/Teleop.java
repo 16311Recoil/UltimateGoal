@@ -53,14 +53,7 @@ public class Teleop extends OpMode
     private boolean changeDpadLeft = false;
 
 
-    private enum TransitionState{
-        IDLE,
-        SCREW_TO_POSITION_UP,
-        SCREW_ACCURACY,
-        SCREW_TO_POSITION_DOWN
-    }
 
-    private TransitionState state;
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -74,7 +67,7 @@ public class Teleop extends OpMode
             e.printStackTrace();
         }
         // Tell the driver that initialization is complete.
-        state = TransitionState.IDLE;
+
         dashboard = FtcDashboard.getInstance();
         dashboardTelem = dashboard.getTelemetry();
         runtime.reset();
@@ -114,59 +107,7 @@ public class Teleop extends OpMode
 
 
 
-        if (gamepad2.right_bumper && !changeRB2 && state == TransitionState.IDLE) {
-            state = TransitionState.SCREW_TO_POSITION_UP;
-            runtime.reset();
-            targetPos += revolution;
 
-        }
-
-        if (gamepad2.dpad_right && !dpadRight && state == TransitionState.IDLE ) {
-            state = TransitionState.SCREW_ACCURACY;
-        }
-
-        if(gamepad2.left_bumper && !changeLB2 && state == TransitionState.IDLE) {
-            state = TransitionState.SCREW_TO_POSITION_DOWN;
-            targetPos -= revolution;
-        }
-
-        if(state == TransitionState.SCREW_ACCURACY){
-            if (gamepad2.left_bumper){
-                robot.getShooter().getScrewMotor().setPower(-0.6);
-            }
-            else if (gamepad2.right_bumper){
-                robot.getShooter().getScrewMotor().setPower(0.6);
-            }
-            else if (gamepad2.dpad_left && !changeDpadLeft)
-                state = TransitionState.SCREW_TO_POSITION_UP;
-            else
-                robot.getShooter().setScrewPower(0);
-        }
-        if (state == TransitionState.SCREW_TO_POSITION_UP){
-            if (currPos <= targetPos){
-                robot.getShooter().getScrewMotor().setPower(0.8);
-            }
-            else {
-                robot.getShooter().getScrewMotor().setPower(0);
-                state = TransitionState.IDLE;
-            }
-
-        }
-
-        if (state == TransitionState.SCREW_TO_POSITION_DOWN){
-            if (currPos >= targetPos)
-                robot.getShooter().getScrewMotor().setPower(-1);
-            else{
-                robot.getShooter().getScrewMotor().setPower(0);
-                state = TransitionState.IDLE;
-            }
-
-        }
-
-        changeRB2 = gamepad2.right_bumper;
-        changeLB2 = gamepad2.left_bumper;
-        dpadRight = gamepad2.dpad_right;
-        changeDpadLeft = gamepad2.dpad_left;
         packet.put("Power", power);
         packet.put("Screw Pos", currPos);
         packet.put("Screw Target", targetPos);

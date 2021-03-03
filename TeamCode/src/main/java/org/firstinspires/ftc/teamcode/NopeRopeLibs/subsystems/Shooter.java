@@ -57,6 +57,20 @@ public class Shooter{
     private double servoPosition;
     private static final double revolution = 753.2;
     ElapsedTime pushTimer = new ElapsedTime();
+    private boolean changeRB2;
+    private boolean dpadRight;
+    private boolean changeLB2;
+    private boolean revolutionBoolean;
+    private boolean changeDpadLeft;
+
+    private enum TransitionState{
+        IDLE,
+        SCREW_TO_POSITION_UP,
+        SCREW_ACCURACY,
+        SCREW_TO_POSITION_DOWN
+    }
+
+    private TransitionState state;
 
 
     public Shooter(LinearOpMode opMode) {
@@ -86,6 +100,7 @@ public class Shooter{
         screwMotor.setDirection(DcMotor.Direction.FORWARD);
 
         servoPosition = ringPusher.getPosition();
+        state = TransitionState.IDLE;
 
 
 //        ringPusher.setDirection(Servo.Direction.FORWARD);
@@ -114,7 +129,7 @@ public class Shooter{
         rotationMotor = this.opMode_iterative.hardwareMap.dcMotor.get("rotationMotor");
         screwMotor = this.opMode_iterative.hardwareMap.dcMotor.get("screwMotor");
 
-
+        state = TransitionState.IDLE;
 
         //Servos
         ringPusher = this.opMode_iterative.hardwareMap.servo.get("ringPusher");
@@ -356,8 +371,7 @@ public class Shooter{
         return (compare >= (1 - percent) * threshold && compare <= threshold * (1 + percent));
     }
 
-    public void screwsControls(double screwPower){
-        //double currPos = screwMotor.getCurrentPosition();
+    //double currPos = screwMotor.getCurrentPosition();
         /*
         if(opMode_iterative.gamepad1.dpad_up && !changeDpadUp){
             screwPower += 0.1;
@@ -391,8 +405,58 @@ public class Shooter{
         changeDpadDown = opMode_iterative.gamepad1.dpad_down;
 
          */
+    public void screwsControls(double screwPower){
+        if (opMode_iterative.gamepad2.right_bumper && !changeRB2 && state == TransitionState.IDLE) {
+            state = TransitionState.SCREW_TO_POSITION_UP;
 
+        }
 
+        if (opMode_iterative.gamepad2.dpad_right && !dpadRight && state == TransitionState.IDLE ) {
+            state = TransitionState.SCREW_ACCURACY;
+        }
+
+        if(opMode_iterative.gamepad2.left_bumper && !changeLB2 && state == TransitionState.IDLE) {
+            state = TransitionState.SCREW_TO_POSITION_DOWN;
+        }
+        if(state == TransitionState.SCREW_ACCURACY){
+            if (opMode_iterative.gamepad2.left_bumper){
+                screwMotor.setPower(-0.6);
+            }
+            else if (opMode_iterative.gamepad2.right_bumper){
+                screwMotor.setPower(0.6);
+            }
+            else if (opMode_iterative.gamepad2.dpad_left && !changeDpadLeft)
+                state = TransitionState.SCREW_TO_POSITION_UP;
+            else
+                setScrewPower(0);
+        }
+        if (state == TransitionState.SCREW_TO_POSITION_UP){
+            if (revolutionBoolean){
+                setScrewPower(0.8);
+            }
+            else {
+                setScrewPower(0);
+                state = TransitionState.IDLE;
+            }
+        }
+
+        if (state == TransitionState.SCREW_TO_POSITION_DOWN){
+            if (revolutionBoolean){
+                setScrewPower(-0.8);
+            }
+            else {
+                setScrewPower(0);
+                state = TransitionState.IDLE;
+            }
+        }
+        changeRB2 = opMode_iterative.gamepad2.right_bumper;
+        changeLB2 = opMode_iterative.gamepad2.left_bumper;
+        dpadRight = opMode_iterative.gamepad2.dpad_right;
+        changeDpadLeft = opMode_iterative.gamepad2.dpad_left;
+    }
+
+    public void setRevBoolean(boolean revolution){
+        this.revolutionBoolean = revolution;
     }
 
     public void doRotation(){

@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.NopeRopeLibs;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import org.firstinspires.ftc.teamcode.NopeRopeLibs.auto.MovementConstants;
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.motion.Drivetrain;
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.subsystems.Sensors;
@@ -64,13 +65,10 @@ public class NopeRope {
 
 
     public void teleOpControls() {
-        // driver 1 controls the drivetrain
         drivetrain.moveTelop(-teleOp.gamepad1.right_stick_x * MULTIPLIER ,teleOp.gamepad1.right_stick_y * MULTIPLIER,  teleOp.gamepad1.left_stick_x);
         intake.intakeControls(1); // test power
         shooter.fullControls(0.9,0,0,0.75,0,0);
-        // for shooter <- who controls the shooter? with what methods?
-        //shooter.moveTeleop(null,null,null,null); //parameters?
-        // don't worry about TeleOp vision right now.
+        shooter.setRevBoolean(sensors.isScrewRevolution());
 
     }
 
@@ -211,4 +209,7 @@ public class NopeRope {
     }
 
 
+    public void performMovement(MovementConstants c) {
+        this.drivetrain.moveToPositionPID(c.xTarget, c.yTarget, c.zTarget, c.timeout, c.constants);
+    }
 }
