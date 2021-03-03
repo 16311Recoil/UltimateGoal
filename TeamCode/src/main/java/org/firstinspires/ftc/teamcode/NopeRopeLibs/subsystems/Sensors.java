@@ -148,18 +148,18 @@ public class Sensors {
     public Sensors(LinearOpMode opMode, FtcDashboard dashboard){
         this.auto = opMode;
         // Gets all REV Hubs
-        LynxModuleUtil.ensureMinimumFirmwareVersion(teleOp.hardwareMap);
-        allHubs = teleOp.hardwareMap.getAll(LynxModule.class);
+        LynxModuleUtil.ensureMinimumFirmwareVersion(auto.hardwareMap);
+        allHubs = auto.hardwareMap.getAll(LynxModule.class);
 
-        transitionValidation = teleOp.hardwareMap.get(DistanceSensor.class, "transitionDS");
-        shooterValidation = teleOp.hardwareMap.get(DistanceSensor.class, "shooterDS");
+        transitionValidation = auto.hardwareMap.get(DistanceSensor.class, "transitionDS");
+        shooterValidation = auto.hardwareMap.get(DistanceSensor.class, "shooterDS");
 
         transition = (Rev2mDistanceSensor) transitionValidation;
         shooter = (Rev2mDistanceSensor) shooterValidation;
 
         stackSize = -1;
-        int relativeLayoutId = teleOp.hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", teleOp.hardwareMap.appContext.getPackageName());
-        relativeLayout = ((Activity) teleOp.hardwareMap.appContext).findViewById(relativeLayoutId);
+        int relativeLayoutId = auto.hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", auto.hardwareMap.appContext.getPackageName());
+        relativeLayout = ((Activity) auto.hardwareMap.appContext).findViewById(relativeLayoutId);
 
         try {
             colorSensor = auto.hardwareMap.get(NormalizedColorSensor.class, "sensor_color");
@@ -194,7 +194,7 @@ public class Sensors {
         parameters.loggingTag = "IMU";
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
-        gyro = opMode.hardwareMap.get(BNO055IMU.class, "imu");
+        gyro = auto.hardwareMap.get(BNO055IMU.class, "imu");
         gyro.initialize(parameters);
 
         for (LynxModule module : allHubs) {
@@ -204,8 +204,8 @@ public class Sensors {
         localizer = new TwoWheelLocalizer(opMode.hardwareMap, this);
         setEncoders((List<Encoder>) localizer.getEncoders());
 
-        int cameraMonitorViewId = opMode.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", opMode.hardwareMap.appContext.getPackageName());
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(opMode.hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        int cameraMonitorViewId = auto.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", auto.hardwareMap.appContext.getPackageName());
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(auto.hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
         this.dashboard = FtcDashboard.getInstance();
 
         // Vuforia Initialization
@@ -371,6 +371,7 @@ public class Sensors {
         });
     }
     public void scan(){
+        webcam.setPipeline(new RingDetectionPipeline());
         TelemetryPacket packet = new TelemetryPacket();
         stackSize = RingDetectionPipeline.stackSize;
         if (stackSize < 0) {

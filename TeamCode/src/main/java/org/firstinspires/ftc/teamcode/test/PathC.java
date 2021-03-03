@@ -1,20 +1,13 @@
 package org.firstinspires.ftc.teamcode.test;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.NopeRopeLibs.NopeRope;
-import org.firstinspires.ftc.teamcode.NopeRopeLibs.PID;
 
-import java.text.Normalizer;
-
-@TeleOp(name = "Path B", group = "Testing")
-public class PIDtest extends LinearOpMode {
+@TeleOp(name = "Path C", group = "Testing")
+public class PathC extends LinearOpMode {
     NopeRope robot;
     FtcDashboard dash;
     double[][] CONSTANTS = new double[3][3];
@@ -69,7 +62,11 @@ public class PIDtest extends LinearOpMode {
         CONSTANTS[Z][kd] = 0;
 
 
-        robot.getDrivetrain().moveToPositionPID(75.0, 0,  BACKWARD, 2.75 * (1000), CONSTANTS); // dec time by 1?
+        robot.getDrivetrain().moveToPositionPID(75.0, 0,  BACKWARD, 4 * (1000), CONSTANTS); // dec time by 1?
+
+
+
+
 
 
 
@@ -81,15 +78,37 @@ public class PIDtest extends LinearOpMode {
 
         CONSTANTS[Y][kp] = 0.9 / 20;
         CONSTANTS[Y][ki] = 0.;
-        CONSTANTS[Y][kd] = 0;
+        CONSTANTS[Y][kd] = 0.03;
 
         CONSTANTS[Z][kp] = 0.035;
         CONSTANTS[Z][ki] = 0;
         CONSTANTS[Z][kd] = 0.25;
 
 
-        robot.getDrivetrain().moveToPositionPID(0.0, -26,  LEFT, 3 * (1000), CONSTANTS); // dec time by 1?
+        robot.getDrivetrain().moveToPositionPID(0.0, -26,  LEFT, 3.5 * (1000), CONSTANTS); // dec time by 1?
 
+        robot.getSensors().startScanning();
+        robot.getSensors().scan();
+        telemetry.update();
+
+        robot.getSensors().stopScanning();
+
+        // MOVEMENT 2.5 ==============================================================================================
+        //forward to C box
+        CONSTANTS[X][kp] = 0.90 / 70.0;
+        CONSTANTS[X][ki] = 0.000;
+        CONSTANTS[X][kd] = 0.1;
+
+        CONSTANTS[Y][kp] = 0;;
+        CONSTANTS[Y][ki] = 0;
+        CONSTANTS[Y][kd] = 0;
+
+        CONSTANTS[Z][kp] = 0.02;
+        CONSTANTS[Z][ki] = 0;
+        CONSTANTS[Z][kd] = 0;
+
+
+        robot.getDrivetrain().moveToPositionPID(120, 0,  BACKWARD, 4 * (1000), CONSTANTS); // dec time by 1?
 
         //Movement 3
         //strafe back
@@ -106,24 +125,9 @@ public class PIDtest extends LinearOpMode {
         CONSTANTS[Z][kd] = 0.15;
 
 
-        robot.getDrivetrain().moveToPositionPID(0.0, 3,  RIGHT, 2.25 * (1000), CONSTANTS);
-
-        //Movement 4
-        //backward to box
-        CONSTANTS[X][kp] = 0.90 / 25;
-        CONSTANTS[X][ki] = 0.000;
-        CONSTANTS[X][kd] = 0.1;
-
-        CONSTANTS[Y][kp] = 0;;
-        CONSTANTS[Y][ki] = 0;
-        CONSTANTS[Y][kd] = 0;
-
-        CONSTANTS[Z][kp] = 0.02;
-        CONSTANTS[Z][ki] = 0;
-        CONSTANTS[Z][kd] = 0;
+        robot.getDrivetrain().moveToPositionPID(0.0, -9,  RIGHT, 3 * (1000), CONSTANTS);
 
 
-        robot.getDrivetrain().moveToPositionPID(92.0, 0,  BACKWARD, 2.5 * (1000), CONSTANTS);
 
         //Movement 5
         //back to original
@@ -140,7 +144,7 @@ public class PIDtest extends LinearOpMode {
         CONSTANTS[Z][kd] = 0;
 
 
-        robot.getDrivetrain().moveToPositionPID(0, 0,  FORWARD, 4 * (1000), CONSTANTS);
+        robot.getDrivetrain().moveToPositionPID(0, 0,  FORWARD, 5 * (1000), CONSTANTS);
 
         //Movement 6
         //Strafe left to grab
@@ -160,29 +164,24 @@ public class PIDtest extends LinearOpMode {
         robot.getDrivetrain().moveToPositionPID(0, -30,  LEFT, 3 * (1000), CONSTANTS);
         telemetry.addData("Encoders", robot.getSensors().getEncoders());
 
+        //Movement 7
+        CONSTANTS[X][kp] = 0.90 / 70.0;
+        CONSTANTS[X][ki] = 0.000;
+        CONSTANTS[X][kd] = 0.1;
+
+        CONSTANTS[Y][kp] = 0;;
+        CONSTANTS[Y][ki] = 0;
+        CONSTANTS[Y][kd] = 0;
+
+        CONSTANTS[Z][kp] = 0.02;
+        CONSTANTS[Z][ki] = 0;
+        CONSTANTS[Z][kd] = 0;
+
+
+        robot.getDrivetrain().moveToPositionPID(120.0, 0,  BACKWARD, 4 * (1000), CONSTANTS); // dec time by 1?
 
         //Movement 7
-        //Strafe right to grab
-        CONSTANTS[X][kp] = 0;
-        CONSTANTS[X][ki] = 0.000;
-        CONSTANTS[X][kd] = 0;
-
-        CONSTANTS[Y][kp] = 0.9 / 30;
-        CONSTANTS[Y][ki] = 0;
-        CONSTANTS[Y][kd] = 0;
-
-        CONSTANTS[Z][kp] = 0.035;
-        CONSTANTS[Z][ki] = 0;
-        CONSTANTS[Z][kd] = 0.15;
-
-
-        robot.getDrivetrain().moveToPositionPID(0, 5,  RIGHT, 2.5 * (1000), CONSTANTS);
-        telemetry.addData("Encoders", robot.getSensors().getEncoders());
-
-
-        //movement 8
-        //move to box
-        CONSTANTS[X][kp] = 0.90 / 80.0;
+        CONSTANTS[X][kp] = 0.90 / 70.0;
         CONSTANTS[X][ki] = 0.000;
         CONSTANTS[X][kd] = 0.1;
 
@@ -190,30 +189,19 @@ public class PIDtest extends LinearOpMode {
         CONSTANTS[Y][ki] = 0;
         CONSTANTS[Y][kd] = 0;
 
-        CONSTANTS[Z][kp] = 0.02;
+        CONSTANTS[Z][kp] = 0;
         CONSTANTS[Z][ki] = 0;
         CONSTANTS[Z][kd] = 0;
 
 
-        robot.getDrivetrain().moveToPositionPID(100.0, 0,  BACKWARD, 4.5 * (1000), CONSTANTS);
+        robot.getDrivetrain().moveToPositionPID(-70.0, 0,  FORWARD, 4 * (1000), CONSTANTS); // dec time by 1?
 
 
-        //movement 9
-        //park
-        CONSTANTS[X][kp] = 0.90 / 60.0;
-        CONSTANTS[X][ki] = 0.000;
-        CONSTANTS[X][kd] = 0.1;
-
-        CONSTANTS[Y][kp] = 0;;
-        CONSTANTS[Y][ki] = 0;
-        CONSTANTS[Y][kd] = 0;
-
-        CONSTANTS[Z][kp] = 0.02;
-        CONSTANTS[Z][ki] = 0;
-        CONSTANTS[Z][kd] = 0;
 
 
-        robot.getDrivetrain().moveToPositionPID(-70.0, 0,  FORWARD, 3 * (1000), CONSTANTS);
+
+
+
 
 
 
