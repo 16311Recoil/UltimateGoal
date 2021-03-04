@@ -23,6 +23,7 @@ public class Shooter{
 
 
     private boolean transitionValid;
+    private boolean screwValid;
 
 
     private boolean shooterValid;
@@ -459,10 +460,20 @@ public class Shooter{
         this.revolutionBoolean = revolution;
     }
 
-    public void doRotation(){
+    public void screwControlsColor(double screwPower){
+
+    }
+
+    public void doRotation(double screwPower){
         ElapsedTime timer = new ElapsedTime();
 
         while (timer.milliseconds() < 100){
+        }
+        if (screwValid){
+            screwMotor.setPower(0);
+        }
+        else{
+            screwMotor.setPower(screwPower);
         }
 
     }
@@ -520,5 +531,6 @@ public class Shooter{
     public void setIn(){
         ringPusher.setPosition(PUSH_IN);
     }
+    public void setRevolutionValid(boolean valid){screwValid = valid;}
 
 }

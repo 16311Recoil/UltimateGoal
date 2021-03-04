@@ -25,9 +25,11 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 public class RecoilLocalizationTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        Sensors sensors = new Sensors(this);
-        Drivetrain drive = new Drivetrain(this, sensors.getLocalizer());
+
+
         FtcDashboard dashboard = FtcDashboard.getInstance();
+        Sensors sensors = new Sensors(this, dashboard);
+        Drivetrain drive = new Drivetrain(this, sensors.getLocalizer());
 
 
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

@@ -204,8 +204,7 @@ public class Sensors {
         localizer = new TwoWheelLocalizer(opMode.hardwareMap, this);
         setEncoders((List<Encoder>) localizer.getEncoders());
 
-        int cameraMonitorViewId = auto.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", auto.hardwareMap.appContext.getPackageName());
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(auto.hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+
         this.dashboard = FtcDashboard.getInstance();
 
         // Vuforia Initialization

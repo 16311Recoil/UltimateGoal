@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.NopeRopeLibs;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
@@ -29,12 +30,13 @@ public class NopeRope {
     private Intake intake;
     private VisionTensorFlow vision1;
     private boolean[] sensorsArray;
+    private FtcDashboard dashboard;
 
 
 
     public NopeRope(LinearOpMode opMode) throws InterruptedException { //decide which path to take here?
         auto = opMode;
-        sensors = new Sensors(auto);
+        sensors = new Sensors(auto, dashboard);
         drivetrain = new Drivetrain(auto, sensors.getLocalizer());
         shooter = new Shooter(auto);
         vision1 = new VisionTensorFlow();
@@ -154,6 +156,10 @@ public class NopeRope {
     public void parkRobot () {
         while (!sensors.getPark()) //to detect the launch line
             drivetrain.setAllMotors(0);
+    }
+
+    public void revolutionValid(){
+        shooter.setRevolutionValid(sensors.isScrewRevolution());
     }
 
     /*

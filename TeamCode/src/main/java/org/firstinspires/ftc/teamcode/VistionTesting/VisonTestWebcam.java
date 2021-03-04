@@ -20,7 +20,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.openftc.easyopencv.OpenCvPipeline;
-
+@TeleOp
 public class VisonTestWebcam extends LinearOpMode
 {
     OpenCvCamera webcam;
@@ -106,12 +106,13 @@ public class VisonTestWebcam extends LinearOpMode
             telemetry.addData("Pipeline time ms", webcam.getPipelineTimeMs());
             telemetry.addData("Overhead time ms", webcam.getOverheadTimeMs());
             telemetry.addData("Theoretical max FPS", webcam.getCurrentPipelineMaxFps());
-            telemetry.addData("RingStackSize", VisionTest.SamplePipeline.getStackSize());
-            telemetry.addData("avg1", VisionTest.SamplePipeline.getAvg1());
-            telemetry.addData("avg2", VisionTest.SamplePipeline.getAvg2());
-            telemetry.addData("Count:", VisionTest.SamplePipeline.getLoopCount());
-            telemetry.addData("Time:", VisionTest.SamplePipeline.getTime());
-            telemetry.addData("Time:", VisionTest.SamplePipeline.getLoopCount() / VisionTest.SamplePipeline.getTime());
+            telemetry.addData("RingStackSize", SamplePipeline.getStackSize());
+            telemetry.addData("avg1", SamplePipeline.getAvg1());
+            telemetry.addData("avg2", SamplePipeline.getAvg2());
+            telemetry.addData("Count:", SamplePipeline.getLoopCount());
+            telemetry.addData("Time:", SamplePipeline.getTime());
+            telemetry.addData("Time:", SamplePipeline.getLoopCount() / SamplePipeline.getTime());
+            dashboard.startCameraStream(webcam, 30);
             telemetry.update();
 
             /*
@@ -172,17 +173,17 @@ public class VisonTestWebcam extends LinearOpMode
     {
         boolean viewportPaused;
 
-        static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(109,128);
-        static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(109,198);
-        static final int UPPER_ORANGE_THRESHOLD =  100; //test
+        static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(55,170);
+        static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(55,210);
+        static final int UPPER_ORANGE_THRESHOLD =  115; //test
         static final int LOWER_ORANGE_THRESHOLD =  0; //test
         static final Scalar BLUE = new Scalar(0, 0, 255);
         static int loopCount = 0;
         ElapsedTime timer = new ElapsedTime();
         static double time = 0;
 
-        static final int REGION_WIDTH = 80;
-        static final int REGION_HEIGHT = 20;
+        static final int REGION_WIDTH = 125;
+        static final int REGION_HEIGHT = 25;
 
         Mat Cb = new Mat();
         Mat YCrCb = new Mat();
@@ -278,8 +279,8 @@ public class VisonTestWebcam extends LinearOpMode
 
             Imgproc.rectangle(
                     input, // Buffer to draw on
-                    region1_pointA, // First point which defines the rectangle
-                    region1_pointB, // Second point which defines the rectangle
+                    region2_pointA, // First point which defines the rectangle
+                    region2_pointB, // Second point which defines the rectangle
                     BLUE, // The color the rectangle is drawn in
                     2); // Thickness of the rectangle lines
 
@@ -297,5 +298,13 @@ public class VisonTestWebcam extends LinearOpMode
              */
 
         }
+        public static int getStackSize(){
+            return stackSize;
+        }
+        public static int getAvg1(){return avg1;}
+        public static int getAvg2(){return avg2;}
+        public static int getLoopCount(){return loopCount;}
+        public static double getTime(){return time;}
     }
+
 }
